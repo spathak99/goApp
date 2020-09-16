@@ -5,15 +5,63 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"encoding/json"
 	"net/http"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq"    
+	"github.com/gorilla/sessions"
 )
 
+
+/*
+	Session keys
+*/
+var (
+    key = []byte("super-secret-key")
+    store = sessions.NewCookieStore(key)
+)
+
+
+/*
+	User Field
+*/
 type Credentials struct {
 	Password string `json:"password", db:"password"`
 	Description string `json:"description",db:"description"`
 	Username string `json:"username", db:"username"`
 }
 
+
+/*
+	Test Session Method
+*/
+func Secret(w http.ResponseWriter, r *http.Request) {
+    session, _ := store.Get(r, "cookie-name")
+
+    // Check if user is authenticated
+    if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+        http.Error(w, "Forbidden", http.StatusForbidden)
+        return
+    }
+
+    // Print secret message
+    print(w, "The cake is a lie!")
+}
+
+
+/*
+	End session for suer
+*/
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+    session, _ := store.Get(r, "cookie-name")
+
+    // Revoke users authentication
+    session.Values["authenticated"] = false
+    session.Save(r, w)
+}
+
+
+/*
+	Signup a new user
+*/
 func Signup(w http.ResponseWriter, r *http.Request){	
 	creds := &Credentials{}
 	err := json.NewDecoder(r.Body).Decode(creds)
@@ -29,7 +77,16 @@ func Signup(w http.ResponseWriter, r *http.Request){
 	}
 }
 
+
+/*
+	Signin existing users
+*/
+
 func Signin(w http.ResponseWriter, r *http.Request){
+	//Start Session
+	session, _ := store.Get(r, "cookie-name")
+
+	//User authentication below
 	creds := &Credentials{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
@@ -56,4 +113,12 @@ func Signin(w http.ResponseWriter, r *http.Request){
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 
+	//Verify Session
+	session.Values["authenticated"] = true
+    session.Save(r, w)
 }
+
+
+
+
+
