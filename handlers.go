@@ -5,6 +5,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"encoding/json"
 	"net/http"
+	 "fmt" 
 	_ "github.com/lib/pq"    
 	"github.com/gorilla/sessions"
 )
@@ -22,7 +23,7 @@ var (
 /*
 	User Field
 */
-type Credentials struct {
+type Profile struct {
 	Password string `json:"password", db:"password"`
 	Description string `json:"description",db:"description"`
 	Username string `json:"username", db:"username"`
@@ -32,7 +33,7 @@ type Credentials struct {
 /*
 	Test Session Method
 */
-func Secret(w http.ResponseWriter, r *http.Request) {
+func UpdateDescription(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "cookie-name")
 
     // Check if user is authenticated
@@ -40,16 +41,25 @@ func Secret(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Forbidden", http.StatusForbidden)
         return
     }
-
-    // Print secret message
-    print(w, "The cake is a lie!")
+	creds := &Profile{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return 
+	}
+	
+	query := fmt.Sprintf("UPDATE users SET description = '%s' WHERE username = '%s';",creds.Description,creds.Username)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 
 /*
 	End session for suer
 */
-
 func Logout(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "cookie-name")
 
@@ -63,7 +73,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	Signup a new user
 */
 func Signup(w http.ResponseWriter, r *http.Request){	
-	creds := &Credentials{}
+	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -71,7 +81,8 @@ func Signup(w http.ResponseWriter, r *http.Request){
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
-	if _, err = db.Query("insert into users values ($1, $2,$3)", creds.Username, string(hashedPassword),string(creds.Description)); err != nil {
+	query := "insert into users values ($1, $2,$3)"
+	if _, err = db.Query(query, creds.Username, string(hashedPassword),string(creds.Description)); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -87,7 +98,7 @@ func Signin(w http.ResponseWriter, r *http.Request){
 	session, _ := store.Get(r, "cookie-name")
 
 	//User authentication below
-	creds := &Credentials{}
+	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -98,7 +109,7 @@ func Signin(w http.ResponseWriter, r *http.Request){
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	storedCreds := &Credentials{}
+	storedCreds := &Profile{}
 	err = result.Scan(&storedCreds.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {

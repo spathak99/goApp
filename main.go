@@ -13,8 +13,8 @@ var db *sql.DB
 func main() {
 	http.HandleFunc("/signin", Signin)
 	http.HandleFunc("/signup", Signup)
-	http.HandleFunc("/secret", Secret)
-	http.HandleFunc("/logout",Logout)
+	http.HandleFunc("/logout", Logout)
+	http.HandleFunc("/update",UpdateDescription)
 	initDB()
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
