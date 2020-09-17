@@ -27,11 +27,13 @@ type Profile struct {
 	Password string `json:"password", db:"password"`
 	Description string `json:"description",db:"description"`
 	Username string `json:"username", db:"username"`
+	GoalWeight float32 `json:"goalweight", db:"goalweight"` 
+	Bodyweight float32 `json:"bodyweight", db:"bodyweight"` 
 }
 
 
 /*
-	Test Session Method
+	Update profile description
 */
 func UpdateDescription(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "cookie-name")
@@ -49,6 +51,32 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	query := fmt.Sprintf("UPDATE users SET description = '%s' WHERE username = '%s';",creds.Description,creds.Username)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+/*
+	Update to your current weight
+*/
+func UpdateWeight(w http.ResponseWriter, r *http.Request) {
+    session, _ := store.Get(r, "cookie-name")
+
+    // Check if user is authenticated
+    if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+        http.Error(w, "Forbidden", http.StatusForbidden)
+        return
+    }
+	creds := &Profile{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return 
+	}
+	
+	query := fmt.Sprintf("UPDATE users SET bodyweight = '%f' WHERE username = '%s';",creds.Bodyweight,creds.Username)
 	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -81,8 +109,8 @@ func Signup(w http.ResponseWriter, r *http.Request){
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
-	query := "insert into users values ($1, $2,$3)"
-	if _, err = db.Query(query, creds.Username, string(hashedPassword),string(creds.Description)); err != nil {
+	query := "insert into users values ($1, $2,$3,$4,$5)"
+	if _, err = db.Query(query, creds.Username, string(hashedPassword),string(creds.Description),creds.GoalWeight,creds.Bodyweight); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
