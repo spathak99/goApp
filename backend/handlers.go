@@ -52,7 +52,7 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 /*
 	Update to your current weight
 */
-func UpdateWeight(w http.ResponseWriter, r *http.Request) {
+func UpdateWeights(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "cookie-name")
 
     // Check if user is authenticated
@@ -73,6 +73,14 @@ func UpdateWeight(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	query2 := fmt.Sprintf("UPDATE users SET goalweight = '%f' WHERE username = '%s';",creds.GoalWeight,creds.Username)
+	if _, err = db.Query(query2); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 }
 
 
