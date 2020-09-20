@@ -16,6 +16,7 @@ func main() {
 	http.HandleFunc("/logout", Logout)
 	http.HandleFunc("/update_bio",UpdateDescription)
 	http.HandleFunc("/update_weight",UpdateWeights)
+	http.HandleFunc("/update_calories",Calories)
 	initDB()
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }

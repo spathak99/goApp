@@ -21,8 +21,6 @@ var (
 
 
 
-
-
 /*
 	Update profile description
 */
@@ -48,6 +46,30 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+
+/*
+Calculate Calories left for the day and update as needed
+*/
+
+func Calories(w http.ResponseWriter, r *http.Request) {
+    session, _ := store.Get(r, "cookie-name")
+
+    // Check if user is authenticated
+    if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+        http.Error(w, "Forbidden", http.StatusForbidden)
+        return
+    }
+	creds := &Profile{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return 
+	}
+	//TODO: Implement Queries and calorie calculation
+}
+
+
 
 /*
 	Update to your current weight
@@ -80,7 +102,6 @@ func UpdateWeights(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 }
 
 
@@ -108,11 +129,18 @@ func Signup(w http.ResponseWriter, r *http.Request){
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
-	query := "insert into users values ($1, $2,$3,$4,$5)"
-	if _, err = db.Query(query, creds.Username, string(hashedPassword),string(creds.Description),creds.GoalWeight,creds.Bodyweight); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	query := "insert into users values ($1, $2,$3,$4,$5,$6)"
+	if _, err = db.Query(query, 
+		creds.Username, 
+		string(hashedPassword),
+		string(creds.Description),
+		creds.GoalWeight,
+		creds.Bodyweight,
+		creds.CalorieGoal); 
+		err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 }
 
 
