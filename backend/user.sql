@@ -3,5 +3,6 @@ create table users (
   password text,
   description text,
   goalweight float,
-  bodyweight float
+  bodyweight float,
+  caloriegoal float
 );
