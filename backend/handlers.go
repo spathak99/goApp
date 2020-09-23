@@ -66,7 +66,7 @@ func Calories(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return 
 	}
-	//TODO: Implement Queries and calorie calculation
+	//TODO: Implement Queries and calorie calculation, along with meals stuff
 }
 
 
