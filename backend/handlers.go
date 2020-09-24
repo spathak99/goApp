@@ -20,7 +20,6 @@ var (
 )
 
 
-
 /*
 	Update profile description
 */
@@ -66,7 +65,14 @@ func Calories(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return 
 	}
-	//TODO: Implement Queries and calorie calculation, along with meals stuff
+	
+	query := fmt.Sprintf("UPDATE users SET caloriesleft = '%f' WHERE username = '%s';",creds.CaloriesLeft,creds.Username)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 }
 
 

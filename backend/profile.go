@@ -10,4 +10,5 @@ type Profile struct {
 	GoalWeight float32 `json:"goalweight", db:"goalweight"` 
 	Bodyweight float32 `json:"bodyweight", db:"bodyweight"` 
 	CalorieGoal float32 `json:"caloriegoal",db"caloriegoal`
+	CaloriesLeft float32 `json:"caloriesleft",db"caloriesleft`
 }
