@@ -11,6 +11,11 @@ const hashCost = 8
 var db *sql.DB
 
 func main() {
+	startServer();
+}
+
+func startServer(){
+	print("Starting Server")
 	http.HandleFunc("/signin", Signin)
 	http.HandleFunc("/signup", Signup)
 	http.HandleFunc("/logout", Logout)

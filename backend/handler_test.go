@@ -2,66 +2,44 @@ package main
 
 import (
     "net/http"
-    "bytes"
-    "net/http/httptest"
     "testing"
+    "io/ioutil"
+    "net/url"
+    "strings"
+    "github.com/stretchr/testify/assert"
 )
 
 
 func TestSignIn(t *testing.T) {
-    jsonData := []byte(`
-		"username":"Shardool",
-		"password":"Pathak",
-		"description":"My Bio",
-		"goalweight": 165,
-		"bodyweight": 188,
-		"caloriegoal":3500,
-		"caloriesleft":1600
-    }`)
+    data := url.Values{
+		"username":{"Shardool"},
+		"password":{"Pathak"},
+		"description":{"My Bio"},
+		"goalweight": {"165"},
+        "bodyweight": {"145"},
+		"caloriegoal":{"3500"},
+		"caloriesleft":{"1600"},
+    }
 
-    req, err := http.NewRequest("POST", "/signin", bytes.NewBuffer(jsonData))
+    url := "http://localhost:8000/signin"
+    client := &http.Client{}
 
+    //Start Server
+    go startServer()
+    req, _ := http.NewRequest("POST", url, strings.NewReader(data.Encode()))
+    req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+    resp, err := client.Do(req)
+
+    //Check Response OK
     if err != nil {
-        t.Fatal(err)
+            panic(err)
     }
-
-    rr := httptest.NewRecorder()
-    handler := http.HandlerFunc(Signin)
-    handler.ServeHTTP(rr, req)
-
-    if status := rr.Code; status != http.StatusOK {
-        t.Errorf("handler returned wrong status code: got %v want %v",
-            status, http.StatusOK)
+    assert.Equal(t, http.StatusOK, resp.StatusCode)
+    
+    //Check Expected Response
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+            panic(err)
     }
-
-	print(rr.Body.String())
 }
 
-func TestSignIn(t *testing.T) {
-    jsonData := []byte(`
-		"username":"Shardool",
-		"password":"Pathak",
-		"description":"My Bio",
-		"goalweight": 165,
-		"bodyweight": 188,
-		"caloriegoal":3500,
-		"caloriesleft":1600
-    }`)
-
-    req, err := http.NewRequest("POST", "/signin", bytes.NewBuffer(jsonData))
-
-    if err != nil {
-        t.Fatal(err)
-    }
-
-    rr := httptest.NewRecorder()
-    handler := http.HandlerFunc(Signin)
-    handler.ServeHTTP(rr, req)
-
-    if status := rr.Code; status != http.StatusOK {
-        t.Errorf("handler returned wrong status code: got %v want %v",
-            status, http.StatusOK)
-    }
-
-	print(rr.Body.String())
-}
