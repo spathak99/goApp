@@ -51,7 +51,7 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 Calculate Calories left for the day and update as needed
 */
 
-func Calories(w http.ResponseWriter, r *http.Request) {
+func UpdateCalories(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "cookie-name")
 
     // Check if user is authenticated
@@ -189,6 +189,28 @@ func Signin(w http.ResponseWriter, r *http.Request){
     session.Save(r, w)
 }
 
+func GetUserData(w http.ResponseWriter,r *http.Request){
+	//Start session
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+        http.Error(w, "Forbidden", http.StatusForbidden)
+        return
+	}
+	
+	//Credentials
+	creds := &Profile{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return 
+	}	
+
+	var user Profile
+	row := db.QueryRow("select * from users where username=$1", creds.Username)
+	err = row.Scan(&user.Username, &user.Password, &user.Description,
+				   &user.GoalWeight, &user.Bodyweight, 
+				   &user.CalorieGoal,&user.CalorieGoal)
+}
 
 
 

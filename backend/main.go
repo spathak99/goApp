@@ -21,7 +21,8 @@ func startServer(){
 	http.HandleFunc("/logout", Logout)
 	http.HandleFunc("/update_bio",UpdateDescription)
 	http.HandleFunc("/update_weight",UpdateWeights)
-	http.HandleFunc("/update_calories",Calories)
+	http.HandleFunc("/update_calories",UpdateCalories)
+	http.HandleFunc("/get_user_data",GetUserData)
 	initDB()
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }

@@ -3,9 +3,9 @@ package main
 import (
     "net/http"
     "testing"
+    "strings"
     "io/ioutil"
     "net/url"
-    "strings"
     "github.com/stretchr/testify/assert"
 )
 
@@ -21,15 +21,15 @@ func TestSignIn(t *testing.T) {
 		"caloriesleft":{"1600"},
     }
 
-    url := "http://localhost:8000/signin"
-    client := &http.Client{}
+    signin_url := "http://localhost:8000/signin"
+
 
     //Start Server
     go startServer()
-    req, _ := http.NewRequest("POST", url, strings.NewReader(data.Encode()))
-    req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+    client := &http.Client{}
+    req, _ := http.NewRequest("POST",signin_url, strings.NewReader(data.Encode()))
     resp, err := client.Do(req)
-
+    
     //Check Response OK
     if err != nil {
             panic(err)
@@ -37,9 +37,10 @@ func TestSignIn(t *testing.T) {
     assert.Equal(t, http.StatusOK, resp.StatusCode)
     
     //Check Expected Response
-    body, err := ioutil.ReadAll(resp.Body)
+    _, err := ioutil.ReadAll(resp.Body)
     if err != nil {
             panic(err)
     }
 }
+
 
