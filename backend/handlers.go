@@ -19,7 +19,6 @@ var (
     store = sessions.NewCookieStore(key)
 )
 
-
 /*
 	Update profile description
 */
