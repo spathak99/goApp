@@ -1,12 +1,27 @@
 import React from 'react';
 import { StyleSheet, Text,TouchableOpacity,TouchableHighlight,TextInput,View } from 'react-native';
 import { string } from 'prop-types';
+import { NavigationScreenProp } from 'react-navigation';
+import { withNavigation } from 'react-navigation';
+
 
 
 export default class App extends React.Component {
   state={
     username:"",
     password:""
+  }
+
+
+  handleSignupOnPress = () => {
+    var username = this.state['username'];
+    var password = this.state['password']
+    var payload = {
+      "username": username,
+      "password": password
+    } 
+    const { navigation } = this.props
+    navigation.navigate('SecondScreen',payload)
   }
 
 
@@ -17,8 +32,23 @@ export default class App extends React.Component {
       "username": username,
       "password": password
     }
-    //TODO Get reponse and move login page
-   
+    fetch('http://localhost:8000/signin', {
+      mode: 'cors',
+      method: 'POST', // or 'PUT'
+      headers: {
+         Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+    .then(response => {
+      if(response.status == 200){
+          //Todo Switch screens and show user profile on new screen
+      }
+    })
+    .catch((error) => {
+      alert(error);
+    });
   }
 
 
@@ -44,7 +74,7 @@ export default class App extends React.Component {
         <TouchableOpacity onPress={this.handleLoginOnPress} style={styles.loginBtn} >
           <Text style={styles.loginText}>LOGIN</Text>
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={this.handleSignupOnPress}  style={styles.loginBtn}>
           <Text style={styles.loginText}>Signup</Text>
         </TouchableOpacity>
       </View>
