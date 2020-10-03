@@ -3,43 +3,39 @@ package main
 import (
     "net/http"
     "testing"
-    "strings"
-    "io/ioutil"
-    "net/url"
+    "bytes"
     "github.com/stretchr/testify/assert"
 )
 
-
+/*
+Testing Signin
+*/
 func TestSignIn(t *testing.T) {
-    data := url.Values{
-		"username":{"Shardool"},
-		"password":{"Pathak"},
-		"description":{"My Bio"},
-		"goalweight": {"165"},
-        "bodyweight": {"145"},
-		"caloriegoal":{"3500"},
-		"caloriesleft":{"1600"},
-    }
-
+    data := []byte(`{
+        "username":"sunofthemoon",
+        "password":"password",
+        "description":"enjoy workoiut",
+        "goalweight": 200,
+        "bodyweight": 188,
+        "caloriegoal": 4000,
+        "caloriesleft": 200
+    }`)
     signin_url := "http://localhost:8000/signin"
 
     //Start Server
     go startServer()
+    req, err := http.NewRequest("POST", signin_url, bytes.NewBuffer(data))
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
     client := &http.Client{}
-    req, _ := http.NewRequest("POST",signin_url, strings.NewReader(data.Encode()))
     resp, err := client.Do(req)
-    
-    //Check Response OK
     if err != nil {
-            panic(err)
+        panic(err)
     }
-    assert.Equal(t, http.StatusOK, resp.StatusCode)
-    
-    //Check Expected Response
-    _, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-            panic(err)
-    }
+    defer resp.Body.Close()
+    assert.Equal(t, "200 OK", resp.Status)
 }
+
 
 

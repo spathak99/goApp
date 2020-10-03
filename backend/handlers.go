@@ -65,8 +65,17 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 	
-	query := fmt.Sprintf("UPDATE users SET caloriesleft = '%f' WHERE username = '%s';",creds.CaloriesLeft,creds.Username)
-	if _, err = db.Query(query); err != nil {
+	var currCals int 
+	row := db.QueryRow("select caloriesleft from users where username=$1", creds.Username)
+	err = row.Scan(&currCals)
+
+	if(int(creds.CaloriesLeft) > currCals){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	
+	query2 := fmt.Sprintf("UPDATE users SET caloriesleft = '%f' WHERE username = '%s';",creds.CaloriesLeft,creds.Username)
+	if _, err = db.Query(query2); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -215,6 +224,7 @@ func GetUserData(w http.ResponseWriter,r *http.Request){
 	err = row.Scan(&user.Username, &user.Password, &user.Description,
 				   &user.GoalWeight, &user.Bodyweight, 
 				   &user.CalorieGoal,&user.CaloriesLeft)
+
 	w.Header().Set("Content-Type", "application/json")
 	ret, err := json.Marshal(user)
 	w.Write(ret)
