@@ -68,9 +68,11 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 	var currCals int 
 	row := db.QueryRow("select caloriesleft from users where username=$1", creds.Username)
 	err = row.Scan(&currCals)
-
-	if(int(creds.CaloriesLeft) > currCals){
-		w.WriteHeader(http.StatusBadRequest)
+	if((int(creds.CaloriesLeft) > currCals) || (int(creds.CaloriesLeft) < 0)){
+	rp := []byte(`{
+			"response":"Cannot increase calories left or make them negative"
+		}`)
+		w.Write(rp)
 		return
 	}
 	
@@ -80,7 +82,11 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
+	rp := []byte(`{
+		"response":"Succesfully updated calories"
+	}`)
+	w.Write(rp)
+	return
 }
 
 
