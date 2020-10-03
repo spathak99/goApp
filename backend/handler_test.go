@@ -23,7 +23,6 @@ func TestSignIn(t *testing.T) {
 
     signin_url := "http://localhost:8000/signin"
 
-
     //Start Server
     go startServer()
     client := &http.Client{}
