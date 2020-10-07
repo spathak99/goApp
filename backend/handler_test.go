@@ -244,6 +244,12 @@ func TestDescriptionUpdate(t *testing.T){
         }
        
         assert.Equal(t, 200, resp.StatusCode)
+
+        var desc string
+        row := db.QueryRow("select description from users where username=$1","testingaccount")
+        err = row.Scan(&desc)
+        assert.Equal(t,desc,"Test Bio 1")
+
     
         //Test 2
         data2 := []byte(`{
@@ -274,4 +280,9 @@ func TestDescriptionUpdate(t *testing.T){
         }
     
         assert.Equal(t, 200, resp.StatusCode)
+
+        var desc2 string
+        row = db.QueryRow("select description from users where username=$1","testingaccount")
+        err = row.Scan(&desc2)
+        assert.Equal(t,desc2,"Test Bio 2")
 }
