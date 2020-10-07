@@ -9,6 +9,7 @@ import (
 
 const hashCost = 8
 var db *sql.DB
+var server *http.Server
 
 func main() {
 	startServer();
@@ -24,7 +25,15 @@ func startServer(){
 	http.HandleFunc("/update_calories",UpdateCalories)
 	http.HandleFunc("/get_user_data",GetUserData)
 	initDB()
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	server = &http.Server{
+        Addr:    ":8000",
+        Handler: http.DefaultServeMux,
+    }
+	log.Fatal(server.ListenAndServe())
+}
+
+func stopServer(){
+	server.Close()
 }
 
 func initDB(){

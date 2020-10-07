@@ -28,8 +28,8 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
     // Check if user is authenticated
     if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
         http.Error(w, "Forbidden", http.StatusForbidden)
-        return
-    }
+	}
+	
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
@@ -51,13 +51,14 @@ Calculate Calories left for the day and update as needed
 */
 
 func UpdateCalories(w http.ResponseWriter, r *http.Request) {
-    session, _ := store.Get(r, "cookie-name")
+	session, _ := store.Get(r, "cookie-name")
+	
 
     // Check if user is authenticated
     if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-        http.Error(w, "Forbidden", http.StatusForbidden)
-        return
-    }
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	}
+
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
@@ -100,8 +101,8 @@ func UpdateWeights(w http.ResponseWriter, r *http.Request) {
     // Check if user is authenticated
     if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
         http.Error(w, "Forbidden", http.StatusForbidden)
-        return
-    }
+	}
+	
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
@@ -214,7 +215,6 @@ func GetUserData(w http.ResponseWriter,r *http.Request){
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
         http.Error(w, "Forbidden", http.StatusForbidden)
-        return
 	}
 	
 	//Credentials
