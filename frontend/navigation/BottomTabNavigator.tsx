@@ -6,8 +6,9 @@ import * as React from 'react';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import LoginScreen from '../screens/LoginScreen';
+import SignupScreen from '../screens/SignupScreen';
 import TabTwoScreen from '../screens/TabTwoScreen';
-import { BottomTabParamList, LoginParamList, TabTwoParamList } from '../types';
+import { BottomTabParamList, LoginParamList, TabTwoParamList,SignUpParamList } from '../types';
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -20,14 +21,7 @@ export default function BottomTabNavigator() {
       tabBarOptions={{ activeTintColor: Colors[colorScheme].tint }}>
       <BottomTab.Screen
         name="Login"
-        component={LoginNavigator}
-        options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
-        }}
-      />
-      <BottomTab.Screen
-        name="TabTwo"
-        component={TabTwoNavigator}
+        component={LoginScreen}
         options={{
           tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
         }}
@@ -44,30 +38,22 @@ function TabBarIcon(props: { name: string; color: string }) {
 
 // Each tab has its own navigation stack, you can read more about this pattern here:
 // https://reactnavigation.org/docs/tab-based-navigation#a-stack-navigator-for-each-tab
-const LoginStack = createStackNavigator<LoginParamList>();
+const Stack = createStackNavigator();
 
-function LoginNavigator() {
+function AppStackNavigator() {
   return (
-    <LoginStack.Navigator>
-      <LoginStack.Screen
+    <Stack.Navigator>
+      <Stack.Screen
         name="LoginScreen"
         component={LoginScreen}
-        options={{ headerTitle: 'Tab One Title' }}
+        options={{ headerTitle: 'Login' }}
       />
-    </LoginStack.Navigator>
+      <Stack.Screen
+        name="SignupScreen"
+        component={SignupScreen}
+        options={{ headerTitle: 'Sign Up' }}
+      />
+    </Stack.Navigator>
   );
 }
 
-const TabTwoStack = createStackNavigator<TabTwoParamList>();
-
-function TabTwoNavigator() {
-  return (
-    <TabTwoStack.Navigator>
-      <TabTwoStack.Screen
-        name="TabTwoScreen"
-        component={TabTwoScreen}
-        options={{ headerTitle: 'Tab Two Title' }}
-      />
-    </TabTwoStack.Navigator>
-  );
-}
