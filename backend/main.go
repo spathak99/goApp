@@ -24,6 +24,7 @@ func startServer(){
 	http.HandleFunc("/update_weight",UpdateWeights)
 	http.HandleFunc("/update_calories",UpdateCalories)
 	http.HandleFunc("/get_user_data",GetUserData)
+	http.HandleFunc("/follow",Follow)
 	initDB()
 	server = &http.Server{
         Addr:    ":8000",

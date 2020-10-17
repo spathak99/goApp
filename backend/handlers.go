@@ -20,6 +20,32 @@ var (
     store = sessions.NewCookieStore(key)
 )
 
+type FollowRelation struct {
+	Follower   string
+	Following  string
+}
+
+
+func Follow(w http.ResponseWriter, r *http.Request){
+	session, _ := store.Get(r, "cookie-name")
+
+    // Check if user is authenticated
+    if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+        http.Error(w, "Forbidden", http.StatusForbidden)
+	}	
+
+    creds := &FollowRelation{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return 
+	}
+	
+	//TODO Add outside user to following for this user, and add this user to follower in outside user in DB
+
+
+}
+
 /*
 	Update profile description
 */
@@ -228,13 +254,16 @@ func GetUserData(w http.ResponseWriter,r *http.Request){
 		return 
 	}	
 
+
 	var user Profile
 	row := db.QueryRow("select * from users where username=$1", creds.Username)
 	err = row.Scan(&user.Username, &user.Password, &user.Description,
 				   &user.GoalWeight, &user.Bodyweight, 
-				   &user.CalorieGoal,&user.CaloriesLeft,&user.Followers,&user.Following)
+				   &user.CalorieGoal,&user.CaloriesLeft,
+				   pq.Array(&user.Followers),pq.Array(&user.Following))
 
 	w.Header().Set("Content-Type", "application/json")
+
 	ret, err := json.Marshal(user)
 	w.Write(ret)
 }
