@@ -12,9 +12,6 @@ export default class App extends React.Component {
     password:""
   }
   
-
-
-
   handleLoginOnPress = () => {
     var username = this.state['username'];
     var password = this.state['password']

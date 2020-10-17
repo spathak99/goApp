@@ -5,5 +5,7 @@ create table users (
   goalweight float,
   bodyweight float,
   caloriegoal float,
-  caloriesleft float
+  caloriesleft float,
+  followers text[],
+  following text[]
 );

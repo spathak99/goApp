@@ -5,6 +5,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"encoding/json"
 	"net/http"
+	"github.com/lib/pq"
 	 "fmt" 
 	_ "github.com/lib/pq"    
 	"github.com/gorilla/sessions"
@@ -150,8 +151,8 @@ func Signup(w http.ResponseWriter, r *http.Request){
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
-	query := "insert into users values ($1, $2,$3,$4,$5,$6,$7)"
-	print(creds.CaloriesLeft)
+	query := "insert into users values ($1, $2,$3,$4,$5,$6,$7,$8,$9)"
+
 	if _, err = db.Query(query, 
 		creds.Username, 
 		string(hashedPassword),
@@ -159,7 +160,9 @@ func Signup(w http.ResponseWriter, r *http.Request){
 		creds.GoalWeight,
 		creds.Bodyweight,
 		creds.CalorieGoal,
-		creds.CaloriesLeft); 
+		creds.CaloriesLeft,
+		pq.Array(creds.Followers),
+		pq.Array(creds.Following)); 
 		err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -229,7 +232,7 @@ func GetUserData(w http.ResponseWriter,r *http.Request){
 	row := db.QueryRow("select * from users where username=$1", creds.Username)
 	err = row.Scan(&user.Username, &user.Password, &user.Description,
 				   &user.GoalWeight, &user.Bodyweight, 
-				   &user.CalorieGoal,&user.CaloriesLeft)
+				   &user.CalorieGoal,&user.CaloriesLeft,&user.Followers,&user.Following)
 
 	w.Header().Set("Content-Type", "application/json")
 	ret, err := json.Marshal(user)
