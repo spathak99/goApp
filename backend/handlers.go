@@ -26,6 +26,9 @@ type FollowRelation struct {
 }
 
 
+/*
+	Add Followers
+*/
 func Follow(w http.ResponseWriter, r *http.Request){
 	session, _ := store.Get(r, "cookie-name")
 
@@ -40,10 +43,54 @@ func Follow(w http.ResponseWriter, r *http.Request){
 		w.WriteHeader(http.StatusBadRequest)
 		return 
 	}
+
+	query := fmt.Sprintf("UPDATE users SET following = following || '%s'::text WHERE username = '%s';",creds.Following,creds.Follower)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	
-	//TODO Add outside user to following for this user, and add this user to follower in outside user in DB
+	query = fmt.Sprintf("UPDATE users SET followers = followers || '%s'::text WHERE username = '%s';",creds.Follower,creds.Following)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
 
+/*
+	Remove Followers
+*/
 
+func Unfollow(w http.ResponseWriter, r *http.Request){
+	session, _ := store.Get(r, "cookie-name")
+
+    // Check if user is authenticated
+    if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+        http.Error(w, "Forbidden", http.StatusForbidden)
+	}	
+
+    creds := &FollowRelation{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return 
+	}
+
+	query := fmt.Sprintf("UPDATE users SET following = ARRAY_REMOVE(following,'%s'::text) WHERE username = '%s';",creds.Following,creds.Follower)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	
+	query = fmt.Sprintf("UPDATE users SET followers = ARRAY_REMOVE(followers,'%s'::text)WHERE username = '%s';",creds.Follower,creds.Following)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 /*
