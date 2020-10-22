@@ -1,7 +1,9 @@
 package main
-
+import(
+	"time"
+)
 /*
-	User Field
+	User 
 */
 type Profile struct {
 	Username string `json:"username", db:"username"`
@@ -13,4 +15,15 @@ type Profile struct {
 	CaloriesLeft float32 `json:"caloriesleft",db"caloriesleft`
 	Followers []string `json:"followers",db"followers"`
 	Following []string `json:"following",db"following"` 
+}
+
+
+/*
+	Post
+*/
+type Posts struct{
+	ID string `json:"id", db:"id"`
+	Username string `json:"username",db"username"`
+	Contents string `json:"contents",db:"contents"` 
+	Date time.Date() `json:"date",db:"date"`  
 }

@@ -9,3 +9,10 @@ create table users (
   followers text[],
   following text[]
 );
+
+create table posts (
+  id text primary key,
+  username text,
+  contents text,
+  date DATETIME
+);

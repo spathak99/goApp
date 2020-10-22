@@ -20,6 +20,9 @@ var (
     store = sessions.NewCookieStore(key)
 )
 
+/*
+	Followers/Following
+*/
 type FollowRelation struct {
 	Follower   string
 	Following  string
