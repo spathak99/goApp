@@ -1,7 +1,5 @@
 package main
-import(
-	"time"
-)
+
 /*
 	User 
 */
@@ -25,5 +23,6 @@ type Posts struct{
 	ID string `json:"id", db:"id"`
 	Username string `json:"username",db"username"`
 	Contents string `json:"contents",db:"contents"` 
-	Date time.Date() `json:"date",db:"date"`  
+	Media string `json:"media",db:"media`
+	Date string `json:"date",db:"date"`  
 }

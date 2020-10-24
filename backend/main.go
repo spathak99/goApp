@@ -26,6 +26,7 @@ func startServer(){
 	http.HandleFunc("/get_user_data",GetUserData)
 	http.HandleFunc("/follow",Follow)
 	http.HandleFunc("/unfollow",Unfollow)
+	http.HandleFunc("/make_post",MakePost)
 	initDB()
 	server = &http.Server{
         Addr:    ":8000",

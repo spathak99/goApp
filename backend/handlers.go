@@ -318,6 +318,34 @@ func GetUserData(w http.ResponseWriter,r *http.Request){
 	w.Write(ret)
 }
 
+func MakePost(w http.ResponseWriter, r * http.Request){
+	//Start session
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+        http.Error(w, "Forbidden", http.StatusForbidden)
+	}
+
+	//Credentials
+	creds := &Posts{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return 
+	}	
+
+	query := "insert into posts values ($1, $2,$3,$4,$5)"
+	if _, err = db.Query(query, 
+		creds.ID,
+		creds.Username, 
+		string(creds.Contents),
+		string(creds.Media),
+		string(creds.Date)); 
+		err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+}
+
 
 
 

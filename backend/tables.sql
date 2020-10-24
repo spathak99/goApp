@@ -14,5 +14,6 @@ create table posts (
   id text primary key,
   username text,
   contents text,
-  date DATETIME
+  media text,
+  date text
 );
