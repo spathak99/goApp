@@ -318,7 +318,7 @@ func GetUserData(w http.ResponseWriter,r *http.Request){
 	w.Write(ret)
 }
 
-func MakePost(w http.ResponseWriter, r * http.Request){
+func MakePost(w http.ResponseWriter, r *http.Request){
 	//Start session
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
@@ -346,6 +346,29 @@ func MakePost(w http.ResponseWriter, r * http.Request){
 		}
 }
 
+
+func GetFeed(w http.ResponseWriter, r *http.Request){
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+        http.Error(w, "Forbidden", http.StatusForbidden)
+	}
+
+	//Credentials
+	creds := &Posts{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return 
+	}	
+
+	/*
+		TODO
+		Grab list of people person follows
+		Grab all posts of those people
+		Sort by date posted with most recent being first
+    */
+		
+}
 
 
 
