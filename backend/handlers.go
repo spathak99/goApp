@@ -354,13 +354,16 @@ func GetFeed(w http.ResponseWriter, r *http.Request){
 	}
 
 	//Credentials
-	creds := &Posts{}
+	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return 
 	}	
 
+	var following []string
+	row := db.QueryRow("select following from users where username=$1", creds.Username)
+	err = row.Scan(&following)
 	/*
 		TODO
 		Grab list of people person follows
