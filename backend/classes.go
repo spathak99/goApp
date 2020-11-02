@@ -19,7 +19,7 @@ type Profile struct {
 /*
 	Post
 */
-type Posts struct{
+type Feed_Post struct{
 	ID string `json:"id", db:"id"`
 	Username string `json:"username",db"username"`
 	Contents string `json:"contents",db:"contents"` 

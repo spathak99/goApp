@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"github.com/lib/pq"
 	 "fmt" 
+	 "strings"
 	_ "github.com/lib/pq"    
 	"github.com/gorilla/sessions"
 )
@@ -326,7 +327,7 @@ func MakePost(w http.ResponseWriter, r *http.Request){
 	}
 
 	//Credentials
-	creds := &Posts{}
+	creds := &Feed_Post{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -356,22 +357,43 @@ func GetFeed(w http.ResponseWriter, r *http.Request){
 	//Credentials
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
-	if err != nil {
+	if(err != nil){
 		w.WriteHeader(http.StatusBadRequest)
 		return 
 	}	
 
+	//Gets all users that current user is following
 	var following []string
 	row := db.QueryRow("select following from users where username=$1", creds.Username)
-	err = row.Scan(&following)
+	err = row.Scan(pq.Array(&following))
+	
+
+	//selects all posts of those users
+
 	/*
 		TODO
-		Grab list of people person follows
-		Grab all posts of those people
-		Sort by date posted with most recent being first
+		Sort posts by date 
     */
-		
+	var post_list []Feed_Post
+	fllwng := strings.Join(following, "','")
+	sqlRaw := fmt.Sprintf(`select * from posts where username in ('%s')`, fllwng)
+	rows, err := db.Query(sqlRaw)
+	if(err != nil){
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var curr_post Feed_Post
+		err = rows.Scan(&curr_post.ID,&curr_post.Username,
+						&curr_post.Contents,&curr_post.Media,
+						&curr_post.Date)
+		if err != nil {
+			panic(err)
+		}
+		post_list = append(post_list,curr_post)
+	}
+	ret, err := json.Marshal(post_list)
+	w.Write(ret)
 }
-
 
 
