@@ -347,7 +347,21 @@ func MakePost(w http.ResponseWriter, r *http.Request){
 		}
 }
 
+/*
+	Reverses news feed so it is in order
+*/
+func reverse(posts []Feed_Post) []Feed_Post {
+	newList := make([]Feed_Post, len(posts))
+	for i, j := 0, len(posts)-1; i <= j; i, j = i+1, j-1 {
+		newList[i], newList[j] = posts[j], posts[i]
+	}
+	return newList
+}
 
+
+/*
+	Grabs news feed for a user
+*/
 func GetFeed(w http.ResponseWriter, r *http.Request){
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
@@ -368,12 +382,6 @@ func GetFeed(w http.ResponseWriter, r *http.Request){
 	err = row.Scan(pq.Array(&following))
 	
 
-	//selects all posts of those users
-
-	/*
-		TODO
-		Sort posts by date 
-    */
 	var post_list []Feed_Post
 	fllwng := strings.Join(following, "','")
 	sqlRaw := fmt.Sprintf(`select * from posts where username in ('%s')`, fllwng)
@@ -392,6 +400,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request){
 		}
 		post_list = append(post_list,curr_post)
 	}
+	post_list := reverse(post_list)
 	ret, err := json.Marshal(post_list)
 	w.Write(ret)
 }
