@@ -382,7 +382,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request){
 	err = row.Scan(pq.Array(&following))
 	
 
-	//
+	//Gets all posts for news feed
 	var post_list []Post
 	fllwng := strings.Join(following, "','")
 	sqlRaw := fmt.Sprintf(`select * from posts where username in ('%s')`, fllwng)

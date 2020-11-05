@@ -17,7 +17,7 @@ type Profile struct {
 
 
 /*
-	Ne
+	Post
 */
 type Post struct{
 	ID string `json:"id", db:"id"`
