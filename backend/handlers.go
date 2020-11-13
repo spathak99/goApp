@@ -357,17 +357,31 @@ func reverse(posts []Post) []Post {
 
 
 /*
-	TODO
-	Upon invoking this function, the curr user should be added to the list of likes of the 
-	curr post
+	Like a post
 */
-func Like(w http.ResponseWriter, r *http.Request){
+func Like_Post(w http.ResponseWriter, r *http.Request){
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
         http.Error(w, "Forbidden", http.StatusForbidden)
 	}
-}
+	
+	//Creds
+	creds := &Like{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return 
+	}	
 
+	//Add username to list of user who like post
+	query := fmt.Sprintf("UPDATE posts SET likes = likes || '%s'::text WHERE ID = '%s';",creds.Username,creds.ID)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+}
 
 
 /*

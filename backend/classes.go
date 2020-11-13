@@ -45,3 +45,11 @@ type FollowRelation struct {
 	Follower   string
 	Following  string
 }
+
+/*
+	Like
+*/
+type Like struct{
+	Username string 
+	ID string 
+}
