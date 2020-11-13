@@ -34,7 +34,7 @@ type Post struct{
 */
 type Program struct{
 	Username string `json:"username",db"username"`
-	File string `json:"file",db"file"`
+	ProgramFile string `json:"programfile",db"programfile"`
 	StartDate string `json:"startdate",db"startdate"`
 }
 

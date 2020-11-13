@@ -20,6 +20,6 @@ create table posts (
 
 create table programs (
   username text primary key,
-  file text,
+  programfile text,
   startdate text
 )
