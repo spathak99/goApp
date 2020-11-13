@@ -15,7 +15,8 @@ create table posts (
   username text,
   contents text,
   media text,
-  date text
+  date text,
+  likes text[]
 );
 
 create table programs (

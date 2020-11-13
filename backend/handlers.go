@@ -355,6 +355,21 @@ func reverse(posts []Post) []Post {
 }
 
 
+
+/*
+	TODO
+	Upon invoking this function, the curr user should be added to the list of likes of the 
+	curr post
+*/
+func Like(w http.ResponseWriter, r *http.Request){
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+        http.Error(w, "Forbidden", http.StatusForbidden)
+	}
+}
+
+
+
 /*
 	Grabs news feed for a user
 */
