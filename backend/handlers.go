@@ -22,15 +22,6 @@ var (
 )
 
 /*
-	Followers/Following
-*/
-type FollowRelation struct {
-	Follower   string
-	Following  string
-}
-
-
-/*
 	Add Followers
 */
 func Follow(w http.ResponseWriter, r *http.Request){

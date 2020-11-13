@@ -17,3 +17,9 @@ create table posts (
   media text,
   date text
 );
+
+create table programs (
+  username text primary key,
+  file text,
+  startdate text
+)

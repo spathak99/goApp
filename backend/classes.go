@@ -15,7 +15,6 @@ type Profile struct {
 	Following []string `json:"following",db"following"` 
 }
 
-
 /*
 	Post
 */
@@ -25,4 +24,22 @@ type Post struct{
 	Contents string `json:"contents",db:"contents"` 
 	Media string `json:"media",db:"media`
 	Date string `json:"date",db:"date"`  
+}
+
+
+/*
+	Workout Program
+*/
+type Program struct{
+	Username string `json:"username",db"username"`
+	File string `json:"file",db"file"`
+	StartDate string `json:"startdate",db"startdate"`
+}
+
+/*
+	Followers/Following
+*/
+type FollowRelation struct {
+	Follower   string
+	Following  string
 }
