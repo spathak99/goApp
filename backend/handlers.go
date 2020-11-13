@@ -329,13 +329,14 @@ func MakePost(w http.ResponseWriter, r *http.Request){
 		return 
 	}	
 
-	query := "insert into posts values ($1, $2,$3,$4,$5)"
+	query := "insert into posts values ($1, $2,$3,$4,$5,$6)"
 	if _, err = db.Query(query, 
 		creds.ID,
 		creds.Username, 
 		string(creds.Contents),
 		string(creds.Media),
-		string(creds.Date)); 
+		string(creds.Date),
+		pq.Array(creds.Likes)); 
 		err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return

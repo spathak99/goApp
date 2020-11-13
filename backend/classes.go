@@ -15,6 +15,7 @@ type Profile struct {
 	Following []string `json:"following",db"following"` 
 }
 
+
 /*
 	Post
 */
@@ -23,7 +24,8 @@ type Post struct{
 	Username string `json:"username",db"username"`
 	Contents string `json:"contents",db:"contents"` 
 	Media string `json:"media",db:"media`
-	Date string `json:"date",db:"date"`  
+	Date string `json:"date",db:"date"` 
+	Likes []string `json:"likes",db:"likes"`
 }
 
 
