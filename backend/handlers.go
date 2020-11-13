@@ -319,6 +319,10 @@ func GetUserData(w http.ResponseWriter,r *http.Request){
 	w.Write(ret)
 }
 
+
+/*
+	Upload a post
+*/
 func MakePost(w http.ResponseWriter, r *http.Request){
 	//Start session
 	session, _ := store.Get(r, "cookie-name")
