@@ -163,9 +163,9 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 
 
 /*
-	Update to your Goal weight
+	Update to your weights
 */
-func UpdateGoal(w http.ResponseWriter, r *http.Request) {
+func UpdateWeights(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "cookie-name")
 
     // Check if user is authenticated
