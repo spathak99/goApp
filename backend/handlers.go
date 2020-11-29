@@ -98,7 +98,7 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
     if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
         http.Error(w, "Forbidden", http.StatusForbidden)
 	}
-	
+
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
@@ -106,6 +106,7 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 	
+	//Updates description
 	query := fmt.Sprintf("UPDATE users SET description = '%s' WHERE username = '%s';",creds.Description,creds.Username)
 	if _, err = db.Query(query); err != nil {
 		print(err)
@@ -162,9 +163,9 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 
 
 /*
-	Update to your current weight
+	Update to your Goal weight
 */
-func UpdateWeights(w http.ResponseWriter, r *http.Request) {
+func UpdateGoal(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "cookie-name")
 
     // Check if user is authenticated
@@ -178,7 +179,7 @@ func UpdateWeights(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return 
 	}
-	
+	//Update Bodyweight
 	query := fmt.Sprintf("UPDATE users SET bodyweight = '%f' WHERE username = '%s';",creds.Bodyweight,creds.Username)
 	if _, err = db.Query(query); err != nil {
 		print(err)
@@ -186,6 +187,7 @@ func UpdateWeights(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Update Goalweight
 	query2 := fmt.Sprintf("UPDATE users SET goalweight = '%f' WHERE username = '%s';",creds.GoalWeight,creds.Username)
 	if _, err = db.Query(query2); err != nil {
 		print(err)
@@ -219,6 +221,7 @@ func Signup(w http.ResponseWriter, r *http.Request){
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
+	//Logs new user
 	query := "insert into users values ($1, $2,$3,$4,$5,$6,$7,$8,$9)"
 
 	if _, err = db.Query(query, 
@@ -237,10 +240,10 @@ func Signup(w http.ResponseWriter, r *http.Request){
 		}
 }
 
+
 /*
 	Signin existing users
 */
-
 func Signin(w http.ResponseWriter, r *http.Request){
 	//Start Session
 	session, _ := store.Get(r, "cookie-name")
@@ -268,7 +271,8 @@ func Signin(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password), []byte(creds.Password)); err != nil {
+	//Hash Password
+	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password),[]byte(creds.Password)); err != nil{
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 
@@ -296,7 +300,7 @@ func GetUserData(w http.ResponseWriter,r *http.Request){
 		return 
 	}	
 
-
+    //Grabs user data from db
 	var user Profile
 	row := db.QueryRow("select * from users where username=$1", creds.Username)
 	err = row.Scan(&user.Username, &user.Password, &user.Description,
