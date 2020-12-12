@@ -3,8 +3,6 @@ package main
 import (
     "net/http"
     "testing"
-    //"fmt"
-    //"encoding/json"
     "io/ioutil"
     "bytes"
     "net/http/httptest"
@@ -69,7 +67,7 @@ func TestSignin(t *testing.T){
 /*
 Testing Calories Update
 */
-func TestCalorieUpdate(t *testing.T){
+func TestCalUpdate(t *testing.T){
 
     //Signin
     signin_url := "http://localhost:8000/signin"
@@ -191,7 +189,7 @@ func TestCalorieUpdate(t *testing.T){
 Test Bio Update
 */
 
-func TestDescriptionUpdate(t *testing.T){
+func TestDescUpdate(t *testing.T){
         //Signin
         signin_url := "http://localhost:8000/signin"
         data := []byte(`{
@@ -291,7 +289,7 @@ func TestDescriptionUpdate(t *testing.T){
 Test Weight Update
 */
 
-func TestWeightUpdate(t *testing.T){
+func TestWeightsUpdate(t *testing.T){
     //Signin
     signin_url := "http://localhost:8000/signin"
     data := []byte(`{

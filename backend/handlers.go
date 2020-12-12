@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"github.com/lib/pq"
-	 "fmt" 
-	 "strings"
+	"fmt" 
+	"strings"
 	_ "github.com/lib/pq"    
 	"github.com/gorilla/sessions"
 )
@@ -198,7 +198,7 @@ func UpdateWeights(w http.ResponseWriter, r *http.Request) {
 
 
 /*
-	End session for suer
+	End session for user
 */
 func Logout(w http.ResponseWriter, r *http.Request) {
     session, _ := store.Get(r, "cookie-name")
