@@ -8,7 +8,36 @@ import (
     "net/http/httptest"
     "github.com/stretchr/testify/assert"
 )
+
 var base_url = "http://localhost:8000"
+
+/*
+Signs in for the handler functions that occur after login
+*/
+func signin_helper(){
+    //Signin
+    signin_data := []byte(`{
+        "username":"testingaccount",
+        "password":"password"
+    }`)
+
+    //Request
+    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(signin_data))
+    if err != nil {
+        panic(err)
+    }
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    //Serve HTTP
+    w := httptest.NewRecorder()
+    handler := http.HandlerFunc(Signin)
+    handler.ServeHTTP(w, req)
+    resp := w.Result()
+    print(resp.StatusCode)
+}
+
+
 
 /*
 Testing Signin
@@ -18,19 +47,19 @@ func TestSignin(t *testing.T){
     go startServer()
     
     //Test Data
-    Bad_Request_Data := []byte(`{
+    Bad_Signin_Data := []byte(`{
         "username":"fake_account"
         "password":"password"
     }`)
 
-    OK_Data := []byte(`{
+    OK_Signin_Data := []byte(`{
         "username":"testingaccount",
         "password":"password"
     }`)
 
 
     //Test 1
-    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(Bad_Request_Data))
+    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(Bad_Signin_Data))
     if err != nil {
         t.Error(err)
     }
@@ -49,7 +78,7 @@ func TestSignin(t *testing.T){
     
 
     //Test 2
-    req, err = http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(OK_Data))
+    req, err = http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(OK_Signin_Data))
     if err != nil {
         t.Error(err)
     }
@@ -68,34 +97,41 @@ func TestSignin(t *testing.T){
 
 
 /*
+Calorie Test Helper
+*/
+
+
+
+/*
 Testing Calories Update
 */
 func TestCalUpdate(t *testing.T){
 
-    //Signin
-    data := []byte(`{
+     //Signin         
+    signin_data := []byte(`{
         "username":"testingaccount",
         "password":"password"
     }`)
 
-    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(data))
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-
+    //Request
+    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(signin_data))
     if err != nil {
         panic(err)
     }
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
 
+    //Serve HTTP
     w := httptest.NewRecorder()
     handler := http.HandlerFunc(Signin)
     handler.ServeHTTP(w, req)
     resp := w.Result()
 
 
-    calorie_url := "http://localhost:8000/update_calories"
 
-    //Test 1
-    data = []byte(`{
+
+    //Testing Data
+    Calorie_Data_1 := []byte(`{
         "username":"testingaccount",
         "password":"password",
         "description":"enjoy workoiut",
@@ -105,27 +141,7 @@ func TestCalUpdate(t *testing.T){
         "caloriesleft": 10
     }`)
 
-    req, err = http.NewRequest("POST",calorie_url, bytes.NewBuffer(data))
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-
-    if err != nil {
-        panic(err)
-    }
-
-    handler2 := http.HandlerFunc(UpdateCalories)
-    handler2.ServeHTTP(w, req)
-    resp = w.Result()
-
-    _, err = ioutil.ReadAll(resp.Body)
-    if err != nil {
-        panic(err)
-    }
-   
-    assert.Equal(t, 200, resp.StatusCode)
-
-    //Test 2
-    data2 := []byte(`{
+    Calorie_Data_2 := []byte(`{
         "username":"testingaccount",
         "password":"password",
         "description":"enjoy workoiut",
@@ -135,28 +151,7 @@ func TestCalUpdate(t *testing.T){
         "caloriesleft": 4000
     }`)
 
-    req, err = http.NewRequest("POST",calorie_url, bytes.NewBuffer(data2))
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-
-    if err != nil {
-        panic(err)
-    }
-
-    handler2.ServeHTTP(w, req)
-    resp = w.Result()
-
-    _, err = ioutil.ReadAll(resp.Body)
-
-    if err != nil {
-        panic(err)
-    }
-
-    assert.Equal(t, 200, resp.StatusCode)
-
-
-    //Test 2
-    data3 := []byte(`{
+    Calorie_Data_3 := []byte(`{
         "username":"testingaccount",
         "password":"password",
         "description":"enjoy workoiut",
@@ -166,22 +161,73 @@ func TestCalUpdate(t *testing.T){
         "caloriesleft": -29
     }`)
 
-    req, err = http.NewRequest("POST",calorie_url, bytes.NewBuffer(data3))
+
+    //Handler
+    handler = http.HandlerFunc(UpdateCalories)
+
+
+    //TEST 1
+    req, err = http.NewRequest("POST",base_url + "/update_calories", bytes.NewBuffer(Calorie_Data_1))
+    if err != nil{
+        t.Error(err)
+    }
     req.Header.Set("X-Custom-Header", "myvalue")
     req.Header.Set("Content-Type", "application/json")
 
-    if err != nil {
-        panic(err)
-    }
-
-    handler2.ServeHTTP(w, req)
+    //Serve HTTP
+    handler.ServeHTTP(w, req)
     resp = w.Result()
 
+    //Resp Body
     _, err = ioutil.ReadAll(resp.Body)
-
     if err != nil {
         panic(err)
     }
+    //Assert
+    assert.Equal(t, 200, resp.StatusCode)
+
+
+
+    //TEST 2
+    req, err = http.NewRequest("POST",base_url + "/update_calories", bytes.NewBuffer(Calorie_Data_2))
+    if err != nil{
+        t.Error(err)
+    }
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    //Serve HTTP
+    handler.ServeHTTP(w, req)
+    resp = w.Result()
+
+    //Resp Body
+    _, err = ioutil.ReadAll(resp.Body)
+    if err != nil {
+        panic(err)
+    }
+    //Assert
+    assert.Equal(t, 200, resp.StatusCode)
+
+
+
+    //TEST 3
+    req, err = http.NewRequest("POST",base_url + "/update_calories", bytes.NewBuffer(Calorie_Data_3))
+    if err != nil{
+        t.Error(err)
+    }
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    //Serve HTTP
+    handler.ServeHTTP(w, req)
+    resp = w.Result()
+
+    //Resp Body
+    _, err = ioutil.ReadAll(resp.Body)
+    if err != nil {
+        panic(err)
+    }
+    //Assert
     assert.Equal(t, 200, resp.StatusCode)
 }
 
