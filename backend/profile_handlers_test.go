@@ -254,36 +254,66 @@ func TestDescUpdate(t *testing.T){
     assert.Equal(t,"Test Bio 2",desc2)
 }
 
+
+/*
+Weight Test Helper
+*/
+func WeightTestHelper(data []byte) (int,int){
+    //Signin         
+    signin_data := []byte(`{
+        "username":"testingaccount",
+        "password":"password"
+    }`)
+
+    //Request
+    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(signin_data))
+    if err != nil {
+        panic(err)
+    }
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    //Serve HTTP
+    w := httptest.NewRecorder()
+    handler := http.HandlerFunc(Signin)
+    handler.ServeHTTP(w, req)
+    resp := w.Result()
+    print(resp.StatusCode)
+
+
+    //TEST 
+    req, err = http.NewRequest("POST",base_url + "/update_weight", bytes.NewBuffer(data))
+    if err != nil{
+        panic(err)
+    }
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    //Serve HTTP
+    handler = http.HandlerFunc(UpdateWeights)
+    handler.ServeHTTP(w, req)
+    resp = w.Result()
+
+    //Resp Body
+    _, err = ioutil.ReadAll(resp.Body)
+    if err != nil {
+        panic(err)
+    }
+    var weight int
+    row := db.QueryRow("select bodyweight from users where username=$1","testingaccount")
+    err = row.Scan(&weight)
+    return weight,resp.StatusCode
+}
+
+
+
 /*
 Test Weight Update
 */
 
 func TestWeightsUpdate(t *testing.T){
-    //Signin
-    signin_url := "http://localhost:8000/signin"
-    data := []byte(`{
-        "username":"testingaccount",
-        "password":"password"
-    }`)
-
-    req, err := http.NewRequest("POST",signin_url, bytes.NewBuffer(data))
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-
-    if err != nil {
-        panic(err)
-    }
-
-    w := httptest.NewRecorder()
-    handler := http.HandlerFunc(Signin)
-    handler.ServeHTTP(w, req)
-    resp := w.Result()
-
-
-    bio_url := "http://localhost:8000/update_weight"
-
     //Test 1
-    data = []byte(`{
+    Mock_Data_1 := []byte(`{
         "username":"testingaccount",
         "password":"password",
         "description":"Test Bio 1",
@@ -293,33 +323,8 @@ func TestWeightsUpdate(t *testing.T){
         "caloriesleft": 10
     }`)
 
-    req, err = http.NewRequest("POST",bio_url, bytes.NewBuffer(data))
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-
-    if err != nil {
-        panic(err)
-    }
-
-    handler2 := http.HandlerFunc(UpdateWeights)
-    handler2.ServeHTTP(w, req)
-    resp = w.Result()
-
-    _, err = ioutil.ReadAll(resp.Body)
-    if err != nil {
-        panic(err)
-    }
-   
-    assert.Equal(t, 200, resp.StatusCode)
-
-    var weight int
-    row := db.QueryRow("select bodyweight from users where username=$1","testingaccount")
-    err = row.Scan(&weight)
-    assert.Equal(t,weight,190)
-
-
     //Test 2
-    data2 := []byte(`{
+    Mock_Data_2 := []byte(`{
         "username":"testingaccount",
         "password":"password",
         "description":"Test Bio 2",
@@ -329,27 +334,13 @@ func TestWeightsUpdate(t *testing.T){
         "caloriesleft": 10
     }`)
 
-    req, err = http.NewRequest("POST",bio_url, bytes.NewBuffer(data2))
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
+    //Test 1
+    weight1,resp1 := WeightTestHelper(Mock_Data_1)
+    assert.Equal(t, 200, resp1)
+    assert.Equal(t,190,weight1)
 
-    if err != nil {
-        panic(err)
-    }
-
-    handler2.ServeHTTP(w, req)
-    resp = w.Result()
-
-    _, err = ioutil.ReadAll(resp.Body)
-
-    if err != nil {
-        panic(err)
-    }
-
-    assert.Equal(t, 200, resp.StatusCode)
-
-    var weight2 int
-    row = db.QueryRow("select goalweight from users where username=$1","testingaccount")
-    err = row.Scan(&weight2)
-    assert.Equal(t,weight2,220)
+    //Test 2
+    weight2,resp2 := WeightTestHelper(Mock_Data_2)
+    assert.Equal(t, 200, resp2)
+    assert.Equal(t,220,weight2)
 }
