@@ -8,58 +8,61 @@ import (
     "net/http/httptest"
     "github.com/stretchr/testify/assert"
 )
+var base_url = "http://localhost:8000"
 
 /*
 Testing Signin
 */
-
-
 func TestSignin(t *testing.T){
     //Start Server
-    signin_url := "http://localhost:8000/signin"
     go startServer()
     
-
-    //Test 1
-    data := []byte(`{
+    //Test Data
+    Bad_Request_Data := []byte(`{
         "username":"fake_account"
         "password":"password"
     }`)
 
-    req, err := http.NewRequest("POST",signin_url, bytes.NewBuffer(data))
+    OK_Data := []byte(`{
+        "username":"testingaccount",
+        "password":"password"
+    }`)
+
+
+    //Test 1
+    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(Bad_Request_Data))
+    if err != nil {
+        t.Error(err)
+    }
     req.Header.Set("X-Custom-Header", "myvalue")
     req.Header.Set("Content-Type", "application/json")
 
-    if err != nil {
-        panic(err)
-    }
-
+    //Serve HTTP
     w := httptest.NewRecorder()
     handler := http.HandlerFunc(Signin)
     handler.ServeHTTP(w, req)
     resp := w.Result()
 
+    //Assert
     assert.Equal(t, 400, resp.StatusCode)
    
-    //Test 2
-    data = []byte(`{
-        "username":"testingaccount",
-        "password":"password"
-    }`)
+    
 
-    req, err = http.NewRequest("POST",signin_url, bytes.NewBuffer(data))
+    //Test 2
+    req, err = http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(OK_Data))
+    if err != nil {
+        t.Error(err)
+    }
     req.Header.Set("X-Custom-Header", "myvalue")
     req.Header.Set("Content-Type", "application/json")
 
-    if err != nil {
-        panic(err)
-    }
-
+    //Serve HTTP
     w = httptest.NewRecorder()
     handler = http.HandlerFunc(Signin)
     handler.ServeHTTP(w, req)
     resp = w.Result()
 
+    //Assert
     assert.Equal(t, 200, resp.StatusCode)
 }
 
@@ -70,13 +73,12 @@ Testing Calories Update
 func TestCalUpdate(t *testing.T){
 
     //Signin
-    signin_url := "http://localhost:8000/signin"
     data := []byte(`{
         "username":"testingaccount",
         "password":"password"
     }`)
 
-    req, err := http.NewRequest("POST",signin_url, bytes.NewBuffer(data))
+    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(data))
     req.Header.Set("X-Custom-Header", "myvalue")
     req.Header.Set("Content-Type", "application/json")
 
