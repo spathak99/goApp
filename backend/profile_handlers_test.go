@@ -258,7 +258,7 @@ func TestDescUpdate(t *testing.T){
 /*
 Weight Test Helper
 */
-func WeightTestHelper(data []byte) (int,int){
+func WeightTestHelper(data []byte,query string) (int,int){
     //Signin         
     signin_data := []byte(`{
         "username":"testingaccount",
@@ -300,7 +300,7 @@ func WeightTestHelper(data []byte) (int,int){
         panic(err)
     }
     var weight int
-    row := db.QueryRow("select bodyweight from users where username=$1","testingaccount")
+    row := db.QueryRow(query,"testingaccount")
     err = row.Scan(&weight)
     return weight,resp.StatusCode
 }
@@ -335,12 +335,12 @@ func TestWeightsUpdate(t *testing.T){
     }`)
 
     //Test 1
-    weight1,resp1 := WeightTestHelper(Mock_Data_1)
+    weight1,resp1 := WeightTestHelper(Mock_Data_1,"select bodyweight from users where username=$1")
     assert.Equal(t, 200, resp1)
     assert.Equal(t,190,weight1)
 
     //Test 2
-    weight2,resp2 := WeightTestHelper(Mock_Data_2)
+    weight2,resp2 := WeightTestHelper(Mock_Data_2,"select goalweight from users where username=$1")
     assert.Equal(t, 200, resp2)
     assert.Equal(t,220,weight2)
 }
