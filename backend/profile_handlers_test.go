@@ -99,15 +99,8 @@ func TestSignin(t *testing.T){
 /*
 Calorie Test Helper
 */
-
-
-
-/*
-Testing Calories Update
-*/
-func TestCalUpdate(t *testing.T){
-
-     //Signin         
+func CalTestHelper(data []byte) int{
+    //Signin         
     signin_data := []byte(`{
         "username":"testingaccount",
         "password":"password"
@@ -126,10 +119,36 @@ func TestCalUpdate(t *testing.T){
     handler := http.HandlerFunc(Signin)
     handler.ServeHTTP(w, req)
     resp := w.Result()
+    print(resp.StatusCode)
+
+
+    //TEST 
+    req, err = http.NewRequest("POST",base_url + "/update_calories", bytes.NewBuffer(data))
+    if err != nil{
+        panic(err)
+    }
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    //Serve HTTP
+    handler.ServeHTTP(w, req)
+    resp = w.Result()
+
+    //Resp Body
+    _, err = ioutil.ReadAll(resp.Body)
+    if err != nil {
+        panic(err)
+    }
+    //Assert
+    return resp.StatusCode
+}
 
 
 
-
+/*
+Testing Calories Update
+*/
+func TestCalUpdate(t *testing.T){
     //Testing Data
     Calorie_Data_1 := []byte(`{
         "username":"testingaccount",
@@ -162,73 +181,17 @@ func TestCalUpdate(t *testing.T){
     }`)
 
 
-    //Handler
-    handler = http.HandlerFunc(UpdateCalories)
+    //Test 1
+    resp1 := CalTestHelper(Calorie_Data_1)
+    assert.Equal(t, 200, resp1)
 
+    //Test 2
+    resp2 := CalTestHelper(Calorie_Data_2)
+    assert.Equal(t, 200, resp2)
 
-    //TEST 1
-    req, err = http.NewRequest("POST",base_url + "/update_calories", bytes.NewBuffer(Calorie_Data_1))
-    if err != nil{
-        t.Error(err)
-    }
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-
-    //Serve HTTP
-    handler.ServeHTTP(w, req)
-    resp = w.Result()
-
-    //Resp Body
-    _, err = ioutil.ReadAll(resp.Body)
-    if err != nil {
-        panic(err)
-    }
-    //Assert
-    assert.Equal(t, 200, resp.StatusCode)
-
-
-
-    //TEST 2
-    req, err = http.NewRequest("POST",base_url + "/update_calories", bytes.NewBuffer(Calorie_Data_2))
-    if err != nil{
-        t.Error(err)
-    }
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-
-    //Serve HTTP
-    handler.ServeHTTP(w, req)
-    resp = w.Result()
-
-    //Resp Body
-    _, err = ioutil.ReadAll(resp.Body)
-    if err != nil {
-        panic(err)
-    }
-    //Assert
-    assert.Equal(t, 200, resp.StatusCode)
-
-
-
-    //TEST 3
-    req, err = http.NewRequest("POST",base_url + "/update_calories", bytes.NewBuffer(Calorie_Data_3))
-    if err != nil{
-        t.Error(err)
-    }
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-
-    //Serve HTTP
-    handler.ServeHTTP(w, req)
-    resp = w.Result()
-
-    //Resp Body
-    _, err = ioutil.ReadAll(resp.Body)
-    if err != nil {
-        panic(err)
-    }
-    //Assert
-    assert.Equal(t, 200, resp.StatusCode)
+    //Test 3
+    resp3 := CalTestHelper(Calorie_Data_3)
+    assert.Equal(t, 200, resp3)
 }
 
 
