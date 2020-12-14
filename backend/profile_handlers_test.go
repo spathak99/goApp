@@ -12,34 +12,6 @@ import (
 var base_url = "http://localhost:8000"
 
 /*
-Signs in for the handler functions that occur after login
-*/
-func signin_helper(){
-    //Signin
-    signin_data := []byte(`{
-        "username":"testingaccount",
-        "password":"password"
-    }`)
-
-    //Request
-    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(signin_data))
-    if err != nil {
-        panic(err)
-    }
-    req.Header.Set("X-Custom-Header", "myvalue")
-    req.Header.Set("Content-Type", "application/json")
-
-    //Serve HTTP
-    w := httptest.NewRecorder()
-    handler := http.HandlerFunc(Signin)
-    handler.ServeHTTP(w, req)
-    resp := w.Result()
-    print(resp.StatusCode)
-}
-
-
-
-/*
 Testing Signin
 */
 func TestSignin(t *testing.T){
@@ -131,6 +103,7 @@ func CalTestHelper(data []byte) int{
     req.Header.Set("Content-Type", "application/json")
 
     //Serve HTTP
+    handler = http.HandlerFunc(UpdateCalories)
     handler.ServeHTTP(w, req)
     resp = w.Result()
 
@@ -195,105 +168,90 @@ func TestCalUpdate(t *testing.T){
 }
 
 
+/*
+Description Test Helper
+*/
+func DescTestHelper(data []byte) (string,int){
+    //Signin         
+    signin_data := []byte(`{
+        "username":"testingaccount",
+        "password":"password"
+    }`)
+
+    //Request
+    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(signin_data))
+    if err != nil {
+        panic(err)
+    }
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    //Serve HTTP
+    w := httptest.NewRecorder()
+    handler := http.HandlerFunc(Signin)
+    handler.ServeHTTP(w, req)
+    resp := w.Result()
+    print(resp.StatusCode)
+
+
+    //TEST 
+    req, err = http.NewRequest("POST",base_url + "/update_bio", bytes.NewBuffer(data))
+    if err != nil{
+        panic(err)
+    }
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    //Serve HTTP
+    handler = http.HandlerFunc(UpdateDescription)
+    handler.ServeHTTP(w, req)
+    resp = w.Result()
+
+    //Resp Body
+    _, err = ioutil.ReadAll(resp.Body)
+    if err != nil {
+        panic(err)
+    }
+    var desc string
+    row := db.QueryRow("select description from users where username=$1","testingaccount")
+    err = row.Scan(&desc)
+    return desc,resp.StatusCode
+}
+
 
 /*
 Test Bio Update
 */
-
 func TestDescUpdate(t *testing.T){
-        //Signin
-        signin_url := "http://localhost:8000/signin"
-        data := []byte(`{
-            "username":"testingaccount",
-            "password":"password"
-        }`)
-    
-        req, err := http.NewRequest("POST",signin_url, bytes.NewBuffer(data))
-        req.Header.Set("X-Custom-Header", "myvalue")
-        req.Header.Set("Content-Type", "application/json")
-    
-        if err != nil {
-            panic(err)
-        }
-    
-        w := httptest.NewRecorder()
-        handler := http.HandlerFunc(Signin)
-        handler.ServeHTTP(w, req)
-        resp := w.Result()
-    
-    
-        bio_url := "http://localhost:8000/update_bio"
-    
-        //Test 1
-        data = []byte(`{
-            "username":"testingaccount",
-            "password":"password",
-            "description":"Test Bio 1",
-            "goalweight": 200,
-            "bodyweight": 188,
-            "caloriegoal": 4000,
-            "caloriesleft": 10
-        }`)
-    
-        req, err = http.NewRequest("POST",bio_url, bytes.NewBuffer(data))
-        req.Header.Set("X-Custom-Header", "myvalue")
-        req.Header.Set("Content-Type", "application/json")
-    
-        if err != nil {
-            panic(err)
-        }
-    
-        handler2 := http.HandlerFunc(UpdateDescription)
-        handler2.ServeHTTP(w, req)
-        resp = w.Result()
-    
-        _, err = ioutil.ReadAll(resp.Body)
-        if err != nil {
-            panic(err)
-        }
-       
-        assert.Equal(t, 200, resp.StatusCode)
+    Mock_Data_1 := []byte(`{
+        "username":"testingaccount",
+        "password":"password",
+        "description":"Test Bio 1",
+        "goalweight": 200,
+        "bodyweight": 188,
+        "caloriegoal": 4000,
+        "caloriesleft": 10
+    }`)
 
-        var desc string
-        row := db.QueryRow("select description from users where username=$1","testingaccount")
-        err = row.Scan(&desc)
-        assert.Equal(t,desc,"Test Bio 1")
+    Mock_Data_2 := []byte(`{
+        "username":"testingaccount",
+        "password":"password",
+        "description":"Test Bio 2",
+        "goalweight": 200,
+        "bodyweight": 188,
+        "caloriegoal": 4000,
+        "caloriesleft": 10
+    }`)
 
-    
-        //Test 2
-        data2 := []byte(`{
-            "username":"testingaccount",
-            "password":"password",
-            "description":"Test Bio 2",
-            "goalweight": 200,
-            "bodyweight": 188,
-            "caloriegoal": 4000,
-            "caloriesleft": 10
-        }`)
-    
-        req, err = http.NewRequest("POST",bio_url, bytes.NewBuffer(data2))
-        req.Header.Set("X-Custom-Header", "myvalue")
-        req.Header.Set("Content-Type", "application/json")
-    
-        if err != nil {
-            panic(err)
-        }
-    
-        handler2.ServeHTTP(w, req)
-        resp = w.Result()
-    
-        _, err = ioutil.ReadAll(resp.Body)
-    
-        if err != nil {
-            panic(err)
-        }
-    
-        assert.Equal(t, 200, resp.StatusCode)
+    //Test 1
+    desc1,resp1 := DescTestHelper(Mock_Data_1)
+    assert.Equal(t, 200, resp1)
+    assert.Equal(t,"Test Bio 1",desc1)
 
-        var desc2 string
-        row = db.QueryRow("select description from users where username=$1","testingaccount")
-        err = row.Scan(&desc2)
-        assert.Equal(t,desc2,"Test Bio 2")
+    //Test 2
+    desc2,resp2 := DescTestHelper(Mock_Data_2)
+    assert.Equal(t, 200, resp2)
+    assert.Equal(t,"Test Bio 2",desc2)
 }
 
 /*
