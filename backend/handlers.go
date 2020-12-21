@@ -382,6 +382,46 @@ func LikePost(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Unlike removes a user from the list of likes on a post
+func Unlike(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	}
+
+	//Creds
+	creds := &Like{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//Check if user likes post
+	var isLiked = false
+	var likes []string
+	row := db.QueryRow("select likes from psots wehre id=$1")
+	err = row.Scan(pq.Array(&likes))
+	for _, username := range likes {
+		if username == creds.Username {
+			isLiked = true
+			break
+		}
+	}
+	if !isLiked {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//Remove username from list of users who like post
+	query := fmt.Sprintf("UPDATE posts SET likes = ARRAY_REMOVE(likes,'%s'::text) WHERE ID = '%s';", creds.Username, creds.ID)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
 // GetFeed grabs the news feed for a given user
 func GetFeed(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
