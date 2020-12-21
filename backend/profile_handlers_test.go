@@ -5,6 +5,7 @@ import (
     "testing"
     "io/ioutil"
     "bytes"
+    "fmt"
     "github.com/lib/pq"
     "net/http/httptest"
     "github.com/stretchr/testify/assert"
@@ -349,7 +350,7 @@ func TestWeightsUpdate(t *testing.T){
 /*
     Follow/Unfollow Test Helper
 */
-func FollowTestHelper(data []byte,f http.HandlerFunc,route string, query string) ([]string,int){
+func FollowTestHelper(data []byte,f http.HandlerFunc,route string, query1 string, query2 string) ([]string,[]string,int){
     //Signin         
     signin_data := []byte(`{
         "username":"testingaccount",
@@ -384,15 +385,22 @@ func FollowTestHelper(data []byte,f http.HandlerFunc,route string, query string)
    handler.ServeHTTP(w, req)
    resp = w.Result()
 
-   //Resp Body + DB Query
+   //Resp Body
    _, err = ioutil.ReadAll(resp.Body)
    if err != nil {
        panic(err)
    }
+
+   //DB Queries
    var following []string
-   row := db.QueryRow(query,"testingaccount")
+   row := db.QueryRow(query1)
    err = row.Scan(pq.Array(&following))
-   return following,resp.StatusCode
+
+   var followers []string
+   row = db.QueryRow(query2)
+   err = row.Scan(pq.Array(&followers))
+
+   return following,followers,resp.StatusCode
 }
 
 
@@ -406,28 +414,36 @@ func TestFollower(t *testing.T){
     }`)
 
     //Test 1
-    following,resp1 := FollowTestHelper(Mock_Data_1,Follow,"/follow","select following from users where username=$1") 
+    follower_query := fmt.Sprintf("select following from users where username='%s'","testingaccount")
+    followed_query := fmt.Sprintf("select followers from users where username='%s'","Shardool")
+
+    following,followers,resp1 := FollowTestHelper(Mock_Data_1,Follow,"/follow",follower_query,followed_query) 
     assert.Equal(t, 200, resp1)
     assert.Contains(t,following,"Shardool")
+    assert.Contains(t,followers,"testingaccount")
 
-    
-    following2,resp2 := FollowTestHelper(Mock_Data_1,Unfollow,"/unfollow","select following from users where username=$1") 
+    following2,followers2,resp2 := FollowTestHelper(Mock_Data_1,Unfollow,"/unfollow",follower_query,followed_query)
     assert.Equal(t, 200, resp2)
     assert.NotContains(t,following2,"Shardool")
+    assert.NotContains(t,followers2,"testingaccount")
 
-
+    
     Mock_Data_2 := []byte(`{
         "follower":"testingaccount",
         "following":"Bijon"
     }`)
 
     //Test 2
-    following,resp1 = FollowTestHelper(Mock_Data_2,Follow,"/follow","select following from users where username=$1") 
+    follower_query = fmt.Sprintf("select following from users where username='%s'","testingaccount")
+    followed_query = fmt.Sprintf("select followers from users where username='%s'","Bijon")
+
+    following,followers,resp1 = FollowTestHelper(Mock_Data_2,Follow,"/follow",follower_query,followed_query) 
     assert.Equal(t, 200, resp1)
     assert.Contains(t,following,"Bijon")
+    assert.Contains(t,followers,"testingaccount")
 
-    
-    following2,resp2 = FollowTestHelper(Mock_Data_2,Unfollow,"/unfollow","select following from users where username=$1") 
+    following2,followers2,resp2 = FollowTestHelper(Mock_Data_2,Unfollow,"/unfollow",follower_query,followed_query)
     assert.Equal(t, 200, resp2)
     assert.NotContains(t,following2,"Bijon")
+    assert.NotContains(t,followers2,"testingaccount")
 }
