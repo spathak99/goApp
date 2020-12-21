@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -314,9 +315,18 @@ func MakePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Generate Random ID
+	n := 6
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+	uniqueID := fmt.Sprintf("%X", b)
+
+	//Query
 	query := "insert into posts values ($1,$2,$3,$4,$5,$6)"
 	if _, err = db.Query(query,
-		creds.ID,
+		uniqueID,
 		creds.Username,
 		string(creds.Contents),
 		string(creds.Media),
