@@ -39,6 +39,18 @@ func Follow(w http.ResponseWriter, r *http.Request){
 		return 
 	}
 
+	//Check is user is already following other user
+	var following []string
+	row := db.QueryRow("select following from users where username=$1", creds.Follower)
+	err = row.Scan(pq.Array(&following))
+	for _, username := range following {
+        if username == creds.Following {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+        }
+    }
+
+	//Update DB on following end
 	query := fmt.Sprintf("UPDATE users SET following = following || '%s'::text WHERE username = '%s';",creds.Following,creds.Follower)
 	if _, err = db.Query(query); err != nil {
 		print(err)
@@ -46,6 +58,7 @@ func Follow(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	
+	//Update DB on followers end
 	query = fmt.Sprintf("UPDATE users SET followers = followers || '%s'::text WHERE username = '%s';",creds.Follower,creds.Following)
 	if _, err = db.Query(query); err != nil {
 		print(err)
@@ -73,6 +86,7 @@ func Unfollow(w http.ResponseWriter, r *http.Request){
 		return 
 	}
 
+	//Update DB on following end
 	query := fmt.Sprintf("UPDATE users SET following = ARRAY_REMOVE(following,'%s'::text) WHERE username = '%s';",creds.Following,creds.Follower)
 	if _, err = db.Query(query); err != nil {
 		print(err)
@@ -80,6 +94,7 @@ func Unfollow(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	
+	//Update DB on followers end
 	query = fmt.Sprintf("UPDATE users SET followers = ARRAY_REMOVE(followers,'%s'::text)WHERE username = '%s';",creds.Follower,creds.Following)
 	if _, err = db.Query(query); err != nil {
 		print(err)
