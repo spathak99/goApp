@@ -5,6 +5,7 @@ import (
     "testing"
     "io/ioutil"
     "bytes"
+    "github.com/lib/pq"
     "net/http/httptest"
     "github.com/stretchr/testify/assert"
 )
@@ -294,7 +295,7 @@ func WeightTestHelper(data []byte,query string) (int,int){
     handler.ServeHTTP(w, req)
     resp = w.Result()
 
-    //Resp Body
+    //Resp Body + DB Query
     _, err = ioutil.ReadAll(resp.Body)
     if err != nil {
         panic(err)
@@ -304,7 +305,6 @@ func WeightTestHelper(data []byte,query string) (int,int){
     err = row.Scan(&weight)
     return weight,resp.StatusCode
 }
-
 
 
 /*
@@ -343,4 +343,91 @@ func TestWeightsUpdate(t *testing.T){
     weight2,resp2 := WeightTestHelper(Mock_Data_2,"select goalweight from users where username=$1")
     assert.Equal(t, 200, resp2)
     assert.Equal(t,220,weight2)
+}
+
+
+/*
+    Follow/Unfollow Test Helper
+*/
+func FollowTestHelper(data []byte,f http.HandlerFunc,route string, query string) ([]string,int){
+    //Signin         
+    signin_data := []byte(`{
+        "username":"testingaccount",
+        "password":"password"
+    }`)
+
+    //Request
+    req, err := http.NewRequest("POST",base_url + "/signin", bytes.NewBuffer(signin_data))
+    if err != nil {
+        panic(err)
+    }
+    req.Header.Set("X-Custom-Header", "myvalue")
+    req.Header.Set("Content-Type", "application/json")
+
+    //Serve HTTP
+    w := httptest.NewRecorder()
+    handler := http.HandlerFunc(Signin)
+    handler.ServeHTTP(w, req)
+    resp := w.Result()
+    print(resp.StatusCode)
+
+   //TEST 
+   req, err = http.NewRequest("POST",base_url + route, bytes.NewBuffer(data))
+   if err != nil{
+       panic(err)
+   }
+   req.Header.Set("X-Custom-Header", "myvalue")
+   req.Header.Set("Content-Type", "application/json")
+
+   //Serve HTTP
+   handler = http.HandlerFunc(f)
+   handler.ServeHTTP(w, req)
+   resp = w.Result()
+
+   //Resp Body + DB Query
+   _, err = ioutil.ReadAll(resp.Body)
+   if err != nil {
+       panic(err)
+   }
+   var following []string
+   row := db.QueryRow(query,"testingaccount")
+   err = row.Scan(pq.Array(&following))
+   return following,resp.StatusCode
+}
+
+
+/*
+Test Follow/Unfollow
+*/
+func TestFollower(t *testing.T){ 
+    Mock_Data_1 := []byte(`{
+        "follower":"testingaccount",
+        "following":"Shardool"
+    }`)
+
+    //Test 1
+    following,resp1 := FollowTestHelper(Mock_Data_1,Follow,"/follow","select following from users where username=$1") 
+    assert.Equal(t, 200, resp1)
+    assert.Contains(t,following,"Shardool")
+
+    
+    following2,resp2 := FollowTestHelper(Mock_Data_1,Unfollow,"/unfollow","select following from users where username=$1") 
+    assert.Equal(t, 200, resp2)
+    assert.NotContains(t,following2,"Shardool")
+
+
+    Mock_Data_2 := []byte(`{
+        "follower":"testingaccount",
+        "following":"Bijon"
+    }`)
+
+    //Test 2
+    following,resp1 = FollowTestHelper(Mock_Data_2,Follow,"/follow","select following from users where username=$1") 
+    assert.Equal(t, 200, resp1)
+    assert.Contains(t,following,"Bijon")
+
+    
+    following2,resp2 = FollowTestHelper(Mock_Data_2,Unfollow,"/unfollow","select following from users where username=$1") 
+    assert.Equal(t, 200, resp2)
+    assert.NotContains(t,following2,"Bijon")
 }
