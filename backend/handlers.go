@@ -2,41 +2,39 @@ package main
 
 import (
 	"database/sql"
-	"golang.org/x/crypto/bcrypt"
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"github.com/lib/pq"
-	"fmt" 
 	"strings"
-	_ "github.com/lib/pq"    
-	"github.com/gorilla/sessions"
-)
 
+	"github.com/gorilla/sessions"
+	"github.com/lib/pq"
+	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
+)
 
 /*
 	Session keys
 */
 var (
-    key = []byte("super-secret-key")
-    store = sessions.NewCookieStore(key)
+	key   = []byte("super-secret-key")
+	store = sessions.NewCookieStore(key)
 )
 
-/*
-	Add Followers
-*/
-func Follow(w http.ResponseWriter, r *http.Request){
+//Follow adds the users from the following/follower list in the respective db entries
+func Follow(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
 
-    // Check if user is authenticated
-    if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-        http.Error(w, "Forbidden", http.StatusForbidden)
-	}	
+	// Check if user is authenticated
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	}
 
-    creds := &FollowRelation{}
+	creds := &FollowRelation{}
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return 
+		return
 	}
 
 	//Check is user is already following other user
@@ -44,22 +42,22 @@ func Follow(w http.ResponseWriter, r *http.Request){
 	row := db.QueryRow("select following from users where username=$1", creds.Follower)
 	err = row.Scan(pq.Array(&following))
 	for _, username := range following {
-        if username == creds.Following {
+		if username == creds.Following {
 			w.WriteHeader(http.StatusBadRequest)
 			return
-        }
-    }
+		}
+	}
 
 	//Update DB on following end
-	query := fmt.Sprintf("UPDATE users SET following = following || '%s'::text WHERE username = '%s';",creds.Following,creds.Follower)
+	query := fmt.Sprintf("UPDATE users SET following = following || '%s'::text WHERE username = '%s';", creds.Following, creds.Follower)
 	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	
+
 	//Update DB on followers end
-	query = fmt.Sprintf("UPDATE users SET followers = followers || '%s'::text WHERE username = '%s';",creds.Follower,creds.Following)
+	query = fmt.Sprintf("UPDATE users SET followers = followers || '%s'::text WHERE username = '%s';", creds.Follower, creds.Following)
 	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -67,35 +65,32 @@ func Follow(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-/*
-	Remove Followers
-*/
-
-func Unfollow(w http.ResponseWriter, r *http.Request){
+// Unfollow removes the users from the following/follower list in the respective db entries
+func Unfollow(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
 
-    // Check if user is authenticated
-    if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-        http.Error(w, "Forbidden", http.StatusForbidden)
-	}	
+	// Check if user is authenticated
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	}
 
-    creds := &FollowRelation{}
+	creds := &FollowRelation{}
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return 
+		return
 	}
 
 	//Update DB on following end
-	query := fmt.Sprintf("UPDATE users SET following = ARRAY_REMOVE(following,'%s'::text) WHERE username = '%s';",creds.Following,creds.Follower)
+	query := fmt.Sprintf("UPDATE users SET following = ARRAY_REMOVE(following,'%s'::text) WHERE username = '%s';", creds.Following, creds.Follower)
 	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	
+
 	//Update DB on followers end
-	query = fmt.Sprintf("UPDATE users SET followers = ARRAY_REMOVE(followers,'%s'::text)WHERE username = '%s';",creds.Follower,creds.Following)
+	query = fmt.Sprintf("UPDATE users SET followers = ARRAY_REMOVE(followers,'%s'::text)WHERE username = '%s';", creds.Follower, creds.Following)
 	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -103,44 +98,12 @@ func Unfollow(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-/*
-	Update profile description
-*/
+// UpdateDescription updates the bio of the given user in their db entry
 func UpdateDescription(w http.ResponseWriter, r *http.Request) {
-    session, _ := store.Get(r, "cookie-name")
-
-    // Check if user is authenticated
-    if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-        http.Error(w, "Forbidden", http.StatusForbidden)
-	}
-
-	creds := &Profile{}
-	err := json.NewDecoder(r.Body).Decode(creds)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return 
-	}
-	
-	//Updates description
-	query := fmt.Sprintf("UPDATE users SET description = '%s' WHERE username = '%s';",creds.Description,creds.Username)
-	if _, err = db.Query(query); err != nil {
-		print(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-
-/*
-Calculate Calories left for the day and update as needed
-*/
-
-func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
-	
 
-    // Check if user is authenticated
-    if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+	// Check if user is authenticated
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
@@ -148,21 +111,46 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return 
+		return
 	}
-	
-	var currCals int 
+
+	//Updates description
+	query := fmt.Sprintf("UPDATE users SET description = '%s' WHERE username = '%s';", creds.Description, creds.Username)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+// UpdateCalories updates the calorie goals and calorie counts for the user
+func UpdateCalories(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "cookie-name")
+
+	// Check if user is authenticated
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	}
+
+	creds := &Profile{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var currCals int
 	row := db.QueryRow("select caloriesleft from users where username=$1", creds.Username)
 	err = row.Scan(&currCals)
-	if((int(creds.CaloriesLeft) > currCals) || (int(creds.CaloriesLeft) < 0)){
-	rp := []byte(`{
+	if (int(creds.CaloriesLeft) > currCals) || (int(creds.CaloriesLeft) < 0) {
+		rp := []byte(`{
 			"response":"Cannot increase calories left or make them negative"
 		}`)
 		w.Write(rp)
 		return
 	}
-	
-	query2 := fmt.Sprintf("UPDATE users SET caloriesleft = '%f' WHERE username = '%s';",creds.CaloriesLeft,creds.Username)
+
+	query2 := fmt.Sprintf("UPDATE users SET caloriesleft = '%f' WHERE username = '%s';", creds.CaloriesLeft, creds.Username)
 	if _, err = db.Query(query2); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -175,27 +163,23 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-
-
-/*
-	Update to your weights
-*/
+// UpdateWeights updates the goal weight and current body weight of the user
 func UpdateWeights(w http.ResponseWriter, r *http.Request) {
-    session, _ := store.Get(r, "cookie-name")
+	session, _ := store.Get(r, "cookie-name")
 
-    // Check if user is authenticated
-    if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-        http.Error(w, "Forbidden", http.StatusForbidden)
+	// Check if user is authenticated
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
-	
+
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return 
+		return
 	}
 	//Update Bodyweight
-	query := fmt.Sprintf("UPDATE users SET bodyweight = '%f' WHERE username = '%s';",creds.Bodyweight,creds.Username)
+	query := fmt.Sprintf("UPDATE users SET bodyweight = '%f' WHERE username = '%s';", creds.Bodyweight, creds.Username)
 	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -203,7 +187,7 @@ func UpdateWeights(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Update Goalweight
-	query2 := fmt.Sprintf("UPDATE users SET goalweight = '%f' WHERE username = '%s';",creds.GoalWeight,creds.Username)
+	query2 := fmt.Sprintf("UPDATE users SET goalweight = '%f' WHERE username = '%s';", creds.GoalWeight, creds.Username)
 	if _, err = db.Query(query2); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -211,36 +195,30 @@ func UpdateWeights(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
-/*
-	End session for user
-*/
+// Logout logs the user out and ends the session
 func Logout(w http.ResponseWriter, r *http.Request) {
-    session, _ := store.Get(r, "cookie-name")
+	session, _ := store.Get(r, "cookie-name")
 
-    // Revoke users authentication
-    session.Values["authenticated"] = false
-    session.Save(r, w)
+	// Revoke users authentication
+	session.Values["authenticated"] = false
+	session.Save(r, w)
 }
 
-
-/*
-	Signup a new user
-*/
-func Signup(w http.ResponseWriter, r *http.Request){	
+// Signup creates a new entry in the users table in the db
+func Signup(w http.ResponseWriter, r *http.Request) {
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return 
+		return
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
 	//Logs new user
 	query := "insert into users values ($1, $2,$3,$4,$5,$6,$7,$8,$9)"
 
-	if _, err = db.Query(query, 
-		creds.Username, 
+	if _, err = db.Query(query,
+		creds.Username,
 		string(hashedPassword),
 		string(creds.Description),
 		creds.GoalWeight,
@@ -248,18 +226,14 @@ func Signup(w http.ResponseWriter, r *http.Request){
 		creds.CalorieGoal,
 		creds.CaloriesLeft,
 		pq.Array(creds.Followers),
-		pq.Array(creds.Following)); 
-		err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		pq.Array(creds.Following)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
-
-/*
-	Signin existing users
-*/
-func Signin(w http.ResponseWriter, r *http.Request){
+// Signin signs in the user and authenticates them
+func Signin(w http.ResponseWriter, r *http.Request) {
 	//Start Session
 	session, _ := store.Get(r, "cookie-name")
 
@@ -268,7 +242,7 @@ func Signin(w http.ResponseWriter, r *http.Request){
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return 
+		return
 	}
 	result := db.QueryRow("select password from users where username=$1", creds.Username)
 	if err != nil {
@@ -287,41 +261,38 @@ func Signin(w http.ResponseWriter, r *http.Request){
 	}
 
 	//Hash Password
-	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password),[]byte(creds.Password)); err != nil{
+	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password), []byte(creds.Password)); err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 
 	//Verify Session
 	session.Values["authenticated"] = true
-    session.Save(r, w)
+	session.Save(r, w)
 }
 
-
-/*
-Grab all profile fields
-*/
-func GetUserData(w http.ResponseWriter,r *http.Request){
+// GetUserData grabs profile struct data for the given user
+func GetUserData(w http.ResponseWriter, r *http.Request) {
 	//Start session
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-        http.Error(w, "Forbidden", http.StatusForbidden)
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
-	
+
 	//Credentials
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return 
-	}	
+		return
+	}
 
-    //Grabs user data from db
+	//Grabs user data from db
 	var user Profile
 	row := db.QueryRow("select * from users where username=$1", creds.Username)
 	err = row.Scan(&user.Username, &user.Password, &user.Description,
-				   &user.GoalWeight, &user.Bodyweight, 
-				   &user.CalorieGoal,&user.CaloriesLeft,
-				   pq.Array(&user.Followers),pq.Array(&user.Following))
+		&user.GoalWeight, &user.Bodyweight,
+		&user.CalorieGoal, &user.CaloriesLeft,
+		pq.Array(&user.Followers), pq.Array(&user.Following))
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -329,15 +300,12 @@ func GetUserData(w http.ResponseWriter,r *http.Request){
 	w.Write(ret)
 }
 
-
-/*
-	Upload a post
-*/
-func MakePost(w http.ResponseWriter, r *http.Request){
+// MakePost creates a post and adds that post to the posts table
+func MakePost(w http.ResponseWriter, r *http.Request) {
 	//Start session
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-        http.Error(w, "Forbidden", http.StatusForbidden)
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	//Credentials
@@ -345,26 +313,23 @@ func MakePost(w http.ResponseWriter, r *http.Request){
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return 
-	}	
+		return
+	}
 
 	query := "insert into posts values ($1,$2,$3,$4,$5,$6)"
-	if _, err = db.Query(query, 
+	if _, err = db.Query(query,
 		creds.ID,
-		creds.Username, 
+		creds.Username,
 		string(creds.Contents),
 		string(creds.Media),
 		string(creds.Date),
-		pq.Array(creds.Likes)); 
-		err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		pq.Array(creds.Likes)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
-/*
-	Reverses news feed so it is in order
-*/
+// Reverse
 func reverse(posts []Post) []Post {
 	newList := make([]Post, len(posts))
 	for i, j := 0, len(posts)-1; i <= j; i, j = i+1, j-1 {
@@ -373,23 +338,19 @@ func reverse(posts []Post) []Post {
 	return newList
 }
 
-
-
-/*
-	Like a post
-*/
-func Like_Post(w http.ResponseWriter, r *http.Request){
+// LikePost adds a username to the list of likes on a given post
+func LikePost(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-        http.Error(w, "Forbidden", http.StatusForbidden)
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
-	
+
 	//Creds
 	creds := &Like{}
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return 
+		return
 	}
 
 	//Check if user already liked post
@@ -397,15 +358,14 @@ func Like_Post(w http.ResponseWriter, r *http.Request){
 	row := db.QueryRow("select likes from posts where id=$1", creds.ID)
 	err = row.Scan(pq.Array(&likes))
 	for _, username := range likes {
-        if username == creds.Username {
+		if username == creds.Username {
 			w.WriteHeader(http.StatusBadRequest)
 			return
-        }
+		}
 	}
-	
 
 	//Add username to list of user who like post
-	query := fmt.Sprintf("UPDATE posts SET likes = likes || '%s'::text WHERE ID = '%s';",creds.Username,creds.ID)
+	query := fmt.Sprintf("UPDATE posts SET likes = likes || '%s'::text WHERE ID = '%s';", creds.Username, creds.ID)
 	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -414,52 +374,46 @@ func Like_Post(w http.ResponseWriter, r *http.Request){
 
 }
 
-
-/*
-	Grabs news feed for a user
-*/
-func GetFeed(w http.ResponseWriter, r *http.Request){
+// GetFeed grabs the news feed for a given user
+func GetFeed(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-        http.Error(w, "Forbidden", http.StatusForbidden)
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	//Credentials
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
-	if(err != nil){
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		return 
-	}	
+		return
+	}
 
 	//Gets all users that current user is following
 	var following []string
 	row := db.QueryRow("select following from users where username=$1", creds.Username)
 	err = row.Scan(pq.Array(&following))
-	
 
 	//Gets all posts for news feed
-	var post_list []Post
+	var postList []Post
 	fllwng := strings.Join(following, "','")
 	sqlRaw := fmt.Sprintf(`select * from posts where username in ('%s')`, fllwng)
 	rows, err := db.Query(sqlRaw)
-	if(err != nil){
+	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var curr_post Post
-		err = rows.Scan(&curr_post.ID,&curr_post.Username,
-						&curr_post.Contents,&curr_post.Media,
-						&curr_post.Date)
+		var currPost Post
+		err = rows.Scan(&currPost.ID, &currPost.Username,
+			&currPost.Contents, &currPost.Media,
+			&currPost.Date)
 		if err != nil {
 			panic(err)
 		}
-		post_list = append(post_list,curr_post)
+		postList = append(postList, currPost)
 	}
-	post_list = reverse(post_list)
-	ret, err := json.Marshal(post_list)
+	postList = reverse(postList)
+	ret, err := json.Marshal(postList)
 	w.Write(ret)
 }
-
-

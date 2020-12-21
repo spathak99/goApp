@@ -2,46 +2,48 @@ package main
 
 import (
 	"database/sql"
-	"net/http"
 	"log"
+	"net/http"
+
 	_ "github.com/lib/pq"
 )
 
 const hashCost = 8
+
 var db *sql.DB
 var server *http.Server
 
 func main() {
-	startServer();
+	startServer()
 }
 
-func startServer(){
+func startServer() {
 	print("Starting Server")
 	http.HandleFunc("/signin", Signin)
 	http.HandleFunc("/signup", Signup)
 	http.HandleFunc("/logout", Logout)
-	http.HandleFunc("/update_bio",UpdateDescription)
-	http.HandleFunc("/update_weight",UpdateWeights)
-	http.HandleFunc("/update_calories",UpdateCalories)
-	http.HandleFunc("/get_user_data",GetUserData)
-	http.HandleFunc("/follow",Follow)
-	http.HandleFunc("/unfollow",Unfollow)
-	http.HandleFunc("/make_post",MakePost)
-	http.HandleFunc("/get_feed",GetFeed)
-	http.HandleFunc("/like_post",Like_Post)
+	http.HandleFunc("/update_bio", UpdateDescription)
+	http.HandleFunc("/update_weight", UpdateWeights)
+	http.HandleFunc("/update_calories", UpdateCalories)
+	http.HandleFunc("/get_user_data", GetUserData)
+	http.HandleFunc("/follow", Follow)
+	http.HandleFunc("/unfollow", Unfollow)
+	http.HandleFunc("/make_post", MakePost)
+	http.HandleFunc("/get_feed", GetFeed)
+	http.HandleFunc("/like_post", LikePost)
 	initDB()
 	server = &http.Server{
-        Addr:    ":8000",
-        Handler: http.DefaultServeMux,
-    }
+		Addr:    ":8000",
+		Handler: http.DefaultServeMux,
+	}
 	log.Fatal(server.ListenAndServe())
 }
 
-func stopServer(){
+func stopServer() {
 	server.Close()
 }
 
-func initDB(){
+func initDB() {
 	var err error
 	db, err = sql.Open("postgres", "dbname=mydb sslmode=disable")
 	if err != nil {
