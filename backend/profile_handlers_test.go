@@ -14,9 +14,7 @@ import (
 
 var baseURL = "http://localhost:8000"
 
-/*
-Testing Signin
-*/
+// TestSignin Test if signin works
 func TestSignin(t *testing.T) {
 	//Start Server
 	go startServer()
@@ -67,9 +65,7 @@ func TestSignin(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 }
 
-/*
-Calorie Test Helper
-*/
+// CalTestHelper is the helper for the calorie test
 func CalTestHelper(data []byte) int {
 	//Signin
 	signinData := []byte(`{
@@ -114,9 +110,7 @@ func CalTestHelper(data []byte) int {
 	return resp.StatusCode
 }
 
-/*
-Testing Calories Update
-*/
+// TestCalUpdate tests if the calorie values are updated correctly
 func TestCalUpdate(t *testing.T) {
 	//Testing Data
 	calorieData1 := []byte(`{
@@ -162,9 +156,7 @@ func TestCalUpdate(t *testing.T) {
 	assert.Equal(t, 200, resp3)
 }
 
-/*
-Description Test Helper
-*/
+// DescTestHelper is a helper for the description update test
 func DescTestHelper(data []byte) (string, int) {
 	//Signin
 	signinData := []byte(`{
@@ -211,9 +203,7 @@ func DescTestHelper(data []byte) (string, int) {
 	return desc, resp.StatusCode
 }
 
-/*
-Test Bio Update
-*/
+// TestDescUpdate tests if the user bio update works as intended
 func TestDescUpdate(t *testing.T) {
 	mockData1 := []byte(`{
         "username":"testingaccount",
@@ -246,9 +236,7 @@ func TestDescUpdate(t *testing.T) {
 	assert.Equal(t, "Test Bio 2", desc2)
 }
 
-/*
-Weight Test Helper
-*/
+// WeightTestHelper is the helper function for the weight update test
 func WeightTestHelper(data []byte, query string) (int, int) {
 	//Signin
 	signinData := []byte(`{
@@ -295,10 +283,7 @@ func WeightTestHelper(data []byte, query string) (int, int) {
 	return weight, resp.StatusCode
 }
 
-/*
-Test Weight Update
-*/
-
+// TestWeightUpdate tests if the users weights are updated as intended
 func TestWeightsUpdate(t *testing.T) {
 	//Test 1
 	mockData1 := []byte(`{
@@ -333,9 +318,7 @@ func TestWeightsUpdate(t *testing.T) {
 	assert.Equal(t, 220, weight2)
 }
 
-/*
-   Follow/Unfollow Test Helper
-*/
+// FollowTestHelper is the helper function for the follow test
 func FollowTestHelper(data []byte, f http.HandlerFunc, route string, query1 string, query2 string) ([]string, []string, int) {
 	//Signin
 	signinData := []byte(`{
@@ -389,9 +372,7 @@ func FollowTestHelper(data []byte, f http.HandlerFunc, route string, query1 stri
 	return following, followers, resp.StatusCode
 }
 
-/*
-Test Follow/Unfollow
-*/
+// TestFollower tests if the follow and unfollow handlers work as intended
 func TestFollower(t *testing.T) {
 	mockData1 := []byte(`{
         "follower":"testingaccount",
