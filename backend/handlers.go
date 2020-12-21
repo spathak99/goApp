@@ -13,9 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-/*
-	Session keys
-*/
+// Session Key and Store
 var (
 	key   = []byte("super-secret-key")
 	store = sessions.NewCookieStore(key)
