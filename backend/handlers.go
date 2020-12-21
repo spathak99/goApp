@@ -348,7 +348,7 @@ func MakePost(w http.ResponseWriter, r *http.Request){
 		return 
 	}	
 
-	query := "insert into posts values ($1, $2,$3,$4,$5,$6)"
+	query := "insert into posts values ($1,$2,$3,$4,$5,$6)"
 	if _, err = db.Query(query, 
 		creds.ID,
 		creds.Username, 
@@ -390,7 +390,19 @@ func Like_Post(w http.ResponseWriter, r *http.Request){
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return 
-	}	
+	}
+
+	//Check if user already liked post
+	var likes []string
+	row := db.QueryRow("select likes from posts where id=$1", creds.ID)
+	err = row.Scan(pq.Array(&likes))
+	for _, username := range likes {
+        if username == creds.Username {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+        }
+	}
+	
 
 	//Add username to list of user who like post
 	query := fmt.Sprintf("UPDATE posts SET likes = likes || '%s'::text WHERE ID = '%s';",creds.Username,creds.ID)
