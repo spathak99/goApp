@@ -17,12 +17,7 @@ func ParseProgram() {
 	//TODO: Parse the training program the correct way
 }
 
-// CalendarSync syncs the parse program with google calendar in the correct way
-func CalendarSync() {
-	//TODO : Sync the parsed program with the google calendar in the correct way
-}
-
 // UpdateProgram updates the user program
 func UpdateProgram() {
-
+	//TODO: Update program code
 }

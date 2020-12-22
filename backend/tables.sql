@@ -7,7 +7,8 @@ create table users (
   caloriegoal float,
   caloriesleft float,
   followers text[],
-  following text[]
+  following text[],
+  program
 );
 
 create table posts (
@@ -23,4 +24,9 @@ create table programs (
   username text primary key,
   programfile text,
   startdate text
+)
+
+create table customprogram(
+  username text primary key,
+  programdict json
 )

@@ -284,7 +284,7 @@ func WeightTestHelper(data []byte, query string) (int, int) {
 	return weight, resp.StatusCode
 }
 
-// TestWeightUpdate tests if the users weights are updated as intended
+// TestWeightsUpdate tests if the users weights are updated as intended
 func TestWeightsUpdate(t *testing.T) {
 	//Test 1
 	mockData1 := []byte(`{
@@ -414,7 +414,7 @@ func TestFollower(t *testing.T) {
 	assert.NotContains(t, followers2, "testingaccount")
 }
 
-// TestLikesHelper is a helper function for the like/unlike post tests
+// LikesTestHelper is a helper function for the like/unlike post tests
 func LikesTestHelper(data []byte, f http.HandlerFunc, route string, query string) ([]string, int) {
 	//Signin
 	signinData := []byte(`{
