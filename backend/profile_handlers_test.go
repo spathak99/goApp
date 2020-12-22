@@ -19,18 +19,13 @@ func TestSignin(t *testing.T) {
 	//Start Server
 	go startServer()
 
-	//Test Data
+	//Test 1
 	badSigninData := []byte(`{
         "username":"fake_account"
         "password":"password"
     }`)
 
-	OKSigninData := []byte(`{
-        "username":"testingaccount",
-        "password":"password"
-    }`)
-
-	//Test 1
+	//HTTP Request
 	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(badSigninData))
 	if err != nil {
 		t.Error(err)
@@ -48,6 +43,12 @@ func TestSignin(t *testing.T) {
 	assert.Equal(t, 400, resp.StatusCode)
 
 	//Test 2
+	OKSigninData := []byte(`{
+        "username":"testingaccount",
+        "password":"password"
+	}`)
+
+	//HTTP Request
 	req, err = http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(OKSigninData))
 	if err != nil {
 		t.Error(err)
