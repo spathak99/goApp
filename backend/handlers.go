@@ -214,7 +214,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
 	//Logs new user
-	query := "insert into users values ($1, $2,$3,$4,$5,$6,$7,$8,$9)"
+	query := "insert into users values ($1, $2,$3,$4,$5,$6,$7,$8,$9,$10)"
 
 	if _, err = db.Query(query,
 		creds.Username,
@@ -225,7 +225,8 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		creds.CalorieGoal,
 		creds.CaloriesLeft,
 		pq.Array(creds.Followers),
-		pq.Array(creds.Following)); err != nil {
+		pq.Array(creds.Following),
+		creds.Program); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -291,7 +292,7 @@ func GetUserData(w http.ResponseWriter, r *http.Request) {
 	err = row.Scan(&user.Username, &user.Password, &user.Description,
 		&user.GoalWeight, &user.Bodyweight,
 		&user.CalorieGoal, &user.CaloriesLeft,
-		pq.Array(&user.Followers), pq.Array(&user.Following))
+		pq.Array(&user.Followers), pq.Array(&user.Following), &user.Program)
 
 	w.Header().Set("Content-Type", "application/json")
 

@@ -21,3 +21,8 @@ func ParseProgram() {
 func CalendarSync() {
 	//TODO : Sync the parsed program with the google calendar in the correct way
 }
+
+// UpdateProgram updates the user program
+func UpdateProgram() {
+
+}
