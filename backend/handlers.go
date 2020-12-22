@@ -400,8 +400,9 @@ func Unlike(w http.ResponseWriter, r *http.Request) {
 	//Check if user likes post
 	var isLiked = false
 	var likes []string
-	row := db.QueryRow("select likes from psots wehre id=$1")
+	row := db.QueryRow("select likes from posts where id=$1")
 	err = row.Scan(pq.Array(&likes))
+	print(likes)
 	for _, username := range likes {
 		if username == creds.Username {
 			isLiked = true

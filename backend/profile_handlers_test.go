@@ -374,12 +374,12 @@ func FollowTestHelper(data []byte, f http.HandlerFunc, route string, query1 stri
 
 // TestFollower tests if the follow and unfollow handlers work as intended
 func TestFollower(t *testing.T) {
+	//Test 1
 	mockData1 := []byte(`{
         "follower":"testingaccount",
         "following":"Shardool"
     }`)
 
-	//Test 1
 	followerQuery := fmt.Sprintf("select following from users where username='%s'", "testingaccount")
 	followedQuery := fmt.Sprintf("select followers from users where username='%s'", "Shardool")
 
@@ -393,12 +393,12 @@ func TestFollower(t *testing.T) {
 	assert.NotContains(t, following2, "Shardool")
 	assert.NotContains(t, followers2, "testingaccount")
 
+	//Test 2
 	mockData2 := []byte(`{
         "follower":"testingaccount",
         "following":"Bijon"
     }`)
 
-	//Test 2
 	followerQuery = fmt.Sprintf("select following from users where username='%s'", "testingaccount")
 	followedQuery = fmt.Sprintf("select followers from users where username='%s'", "Bijon")
 
@@ -411,4 +411,73 @@ func TestFollower(t *testing.T) {
 	assert.Equal(t, 200, resp2)
 	assert.NotContains(t, following2, "Bijon")
 	assert.NotContains(t, followers2, "testingaccount")
+}
+
+// TestLikesHelper is a helper function for the like/unlike post tests
+func LikesTestHelper(data []byte, f http.HandlerFunc, route string, query string) ([]string, int) {
+	//Signin
+	signinData := []byte(`{
+        "username":"testingaccount",
+        "password":"password"
+    }`)
+
+	//Request
+	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(Signin)
+	handler.ServeHTTP(w, req)
+	resp := w.Result()
+	print(resp.StatusCode)
+
+	//TEST
+	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	handler = http.HandlerFunc(f)
+	handler.ServeHTTP(w, req)
+	resp = w.Result()
+
+	//Resp Body
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	//DB query
+	var likes []string
+	row := db.QueryRow(query)
+	err = row.Scan(pq.Array(&likes))
+
+	return likes, resp.StatusCode
+}
+
+// TestLikes tests liking and unliking posts
+func TestLikes(t *testing.T) {
+	mockData1 := []byte(`{
+        "username":"testingaccount",
+        "id":"5492C1CA32B7"
+    }`)
+
+	query := fmt.Sprintf("select likes from posts where id='%s'", "5492C1CA32B7")
+
+	//Test 1
+	likes, resp := LikesTestHelper(mockData1, LikePost, "/like_post", query)
+	assert.Equal(t, 200, resp)
+	assert.Contains(t, likes, "testingaccount")
+
+	likes2, resp2 := LikesTestHelper(mockData1, Unlike, "/unlike_post", query)
+	assert.Equal(t, 200, resp2)
+	assert.NotContains(t, likes2, "testingaccount")
 }
