@@ -226,7 +226,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		creds.CaloriesLeft,
 		pq.Array(creds.Followers),
 		pq.Array(creds.Following),
-		creds.Program); err != nil {
+		string(creds.Program)); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
