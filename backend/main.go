@@ -32,6 +32,7 @@ func startServer() {
 	http.HandleFunc("/get_feed", GetFeed)
 	http.HandleFunc("/like_post", LikePost)
 	http.HandleFunc("/unlike_post", Unlike)
+	http.HandleFunc("/initial_custom_program", InitializeProgram)
 	initDB()
 	server = &http.Server{
 		Addr:    ":8000",

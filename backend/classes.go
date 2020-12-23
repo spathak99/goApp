@@ -33,9 +33,9 @@ type Program struct {
 
 // CustomProgram is the struct for a program that the user can chose to create
 type CustomProgram struct {
-	Username    string   `json:"username",db"username"`
-	ProgramDict []byte   `json:"programdict",db"programdict"`
-	WorkoutDays []string `json:"workoutdays",db"workoutdays"`
+	Username    string      `json:"username",db"username"`
+	ProgramDict PropertyMap `json:"programdict",db"programdict"`
+	WorkoutDays []string    `json:"workoutdays",db"workoutdays"`
 }
 
 // FollowRelation is the struct for follower/following relationship
