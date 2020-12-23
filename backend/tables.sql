@@ -28,5 +28,6 @@ create table programs (
 
 create table customprogram(
   username text primary key,
-  programdict json
+  programdict json,
+  workoutdays text[]
 )
