@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/lib/pq"
@@ -15,19 +16,26 @@ func InitializeProgram(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Credentials
-	creds := &CustomProgram{}
-	err := json.NewDecoder(r.Body).Decode(creds)
+	creds := &CustomProgramHelper{}
+	body, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(body, &creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	//Shift to the struct that is compatible with the db
+	program := CustomProgram{}
+	program.Username = creds.Username
+	program.ProgramDict = string(creds.ProgramDict)
+	program.WorkoutDays = creds.WorkoutDays
+
 	//DB Query
 	query := "insert into customprograms values ($1,$2,$3)"
 	if _, err = db.Query(query,
-		creds.Username,
-		creds.ProgramDict,
-		pq.Array(creds.WorkoutDays)); err != nil {
+		program.Username,
+		program.ProgramDict,
+		pq.Array(program.WorkoutDays)); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

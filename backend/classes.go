@@ -1,5 +1,7 @@
 package main
 
+import "encoding/json"
+
 // Profile is the user struct
 type Profile struct {
 	Username     string   `json:"username", db:"username"`
@@ -31,11 +33,18 @@ type Program struct {
 	StartDate   string `json:"startdate",db"startdate"`
 }
 
+// CustomProgramHelper is the struct that does not communicate with the DB
+type CustomProgramHelper struct {
+	Username    string
+	ProgramDict json.RawMessage
+	WorkoutDays []string
+}
+
 // CustomProgram is the struct for a program that the user can chose to create
 type CustomProgram struct {
-	Username    string      `json:"username",db"username"`
-	ProgramDict PropertyMap `json:"programdict",db"programdict"`
-	WorkoutDays []string    `json:"workoutdays",db"workoutdays"`
+	Username    string   `json:"username",db"username"`
+	ProgramDict string   `json:"programdict",db"programdict"`
+	WorkoutDays []string `json:"workoutdays",db"workoutdays"`
 }
 
 // FollowRelation is the struct for follower/following relationship

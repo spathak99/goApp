@@ -26,8 +26,8 @@ create table programs (
   startdate text
 )
 
-create table customprogram(
+create table customprograms(
   username text primary key,
-  programdict jsonb,
+  programdict json,
   workoutdays text[]
 )
