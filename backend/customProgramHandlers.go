@@ -8,8 +8,8 @@ import (
 	"github.com/lib/pq"
 )
 
-// InitializeProgram initializes the first custom program
-func InitializeProgram(w http.ResponseWriter, r *http.Request) {
+// UpdateCustomProgram initializes the first custom program
+func UpdateCustomProgram(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
@@ -41,7 +41,34 @@ func InitializeProgram(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// UpdateCustomProgram updates the db with a new jsonified program
-func UpdateCustomProgram() {
-	//Replace program in db
+// GetCustomProgram grabs the users custom program
+func GetCustomProgram(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	}
+
+	//Credentials
+	creds := &CustomProgramHelper{}
+	body, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(body, &creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//Grab program from database
+	var TempProgram CustomProgram
+	row := db.QueryRow(`select * from customprograms where username=$1`, creds.Username)
+	err = row.Scan(&TempProgram.Username, &TempProgram.ProgramDict, pq.Array(&TempProgram.WorkoutDays))
+
+	//Switch to helper struct
+	var program CustomProgramHelper
+	program.Username = TempProgram.Username
+	program.ProgramDict = []byte(TempProgram.ProgramDict)
+	program.WorkoutDays = TempProgram.WorkoutDays
+
+	//Write Response
+	ret, err := json.Marshal(program)
+	w.Write(ret)
 }
