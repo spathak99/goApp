@@ -219,7 +219,7 @@ func TestDescUpdate(t *testing.T) {
 	mockData2 := []byte(`{
         "username":"testingaccount",
         "password":"password",
-        "description":"Test Bio 2",
+        "description":"Test Bio 3",
         "goalweight": 200,
         "bodyweight": 188,
         "caloriegoal": 4000,
@@ -234,11 +234,11 @@ func TestDescUpdate(t *testing.T) {
 	//Test 2
 	desc2, resp2 := DescTestHelper(mockData2)
 	assert.Equal(t, 200, resp2)
-	assert.Equal(t, "Test Bio 2", desc2)
+	assert.Equal(t, "Test Bio 3", desc2)
 }
 
 // WeightTestHelper is the helper function for the weight update test
-func WeightTestHelper(data []byte, query string) (int, int) {
+func WeightTestHelper(data []byte, query1 string, query2 string) (int, int, int) {
 	//Signin
 	signinData := []byte(`{
         "username":"testingaccount",
@@ -279,9 +279,14 @@ func WeightTestHelper(data []byte, query string) (int, int) {
 		panic(err)
 	}
 	var weight int
-	row := db.QueryRow(query, "testingaccount")
+	row := db.QueryRow(query1, "testingaccount")
 	err = row.Scan(&weight)
-	return weight, resp.StatusCode
+
+	var goalWeight int
+	row = db.QueryRow(query2, "testingaccount")
+	err = row.Scan(&goalWeight)
+
+	return weight, goalWeight, resp.StatusCode
 }
 
 // TestWeightsUpdate tests if the users weights are updated as intended
@@ -291,7 +296,7 @@ func TestWeightsUpdate(t *testing.T) {
         "username":"testingaccount",
         "password":"password",
         "description":"Test Bio 1",
-        "goalweight": 200,
+        "goalweight": 245,
         "bodyweight": 190,
         "caloriegoal": 4000,
         "caloriesleft": 10
@@ -303,20 +308,24 @@ func TestWeightsUpdate(t *testing.T) {
         "password":"password",
         "description":"Test Bio 2",
         "goalweight": 220,
-        "bodyweight": 190,
+        "bodyweight": 330,
         "caloriegoal": 4000,
         "caloriesleft": 10
     }`)
 
+	Query1 := "select bodyweight from users where username=$1"
+	Query2 := "select goalweight from users where username=$1"
 	//Test 1
-	weight1, resp1 := WeightTestHelper(mockData1, "select bodyweight from users where username=$1")
+	weight1, goalWeight1, resp1 := WeightTestHelper(mockData1, Query1, Query2)
 	assert.Equal(t, 200, resp1)
 	assert.Equal(t, 190, weight1)
+	assert.Equal(t, 245, goalWeight1)
 
 	//Test 2
-	weight2, resp2 := WeightTestHelper(mockData2, "select goalweight from users where username=$1")
+	weight2, goalWeight2, resp2 := WeightTestHelper(mockData2, Query1, Query2)
 	assert.Equal(t, 200, resp2)
-	assert.Equal(t, 220, weight2)
+	assert.Equal(t, 330, weight2)
+	assert.Equal(t, 220, goalWeight2)
 }
 
 // FollowTestHelper is the helper function for the follow test
@@ -481,4 +490,72 @@ func TestLikes(t *testing.T) {
 	likes2, resp2 := LikesTestHelper(mockData1, Unlike, "/unlike_post", query)
 	assert.Equal(t, 200, resp2)
 	assert.NotContains(t, likes2, "testingaccount")
+}
+
+// CustomProgramTestHelper helps with the program test
+func CustomProgramTestHelper(data []byte, f http.HandlerFunc, route string, query string) (CustomProgram, int) {
+	//Signin
+	signinData := []byte(`{
+		"username":"testingaccount",
+		"password":"password"
+	}`)
+
+	//Request
+	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(Signin)
+	handler.ServeHTTP(w, req)
+	resp := w.Result()
+	print(resp.StatusCode)
+
+	//TEST
+	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	handler = http.HandlerFunc(f)
+	handler.ServeHTTP(w, req)
+	resp = w.Result()
+
+	//Resp Body
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	//DB query
+	var temp CustomProgram
+	row := db.QueryRow(query, "testingaccount")
+	err = row.Scan(&temp.Username, &temp.ProgramDict, pq.Array(&temp.WorkoutDays))
+	return temp, resp.StatusCode
+}
+
+// TestCustomProgram tests if the program is updated correctly
+func TestCustomProgram(t *testing.T) {
+	mockData1 := []byte(`{
+		"username":"testingaccount",
+		"programdict": {"Test_Key": "Test_Value"},
+		"workoutdays":["monday","wednesday","friday"]
+	}`)
+
+	query := "select * from customprograms where username='%s'"
+
+	program, resp := CustomProgramTestHelper(mockData1, UpdateCustomProgram, "/update_custom_program", query)
+	assert.Equal(t, 200, resp)
+	assert.Equal(t, "testingaccount", program.Username)
+	assert.Equal(t, `{"Test_Key": "Test_Value"}`, program.ProgramDict)
+	assert.Contains(t, program.WorkoutDays, "monday")
+	assert.Contains(t, program.WorkoutDays, "wednesday")
+	assert.Contains(t, program.WorkoutDays, "friday")
 }
