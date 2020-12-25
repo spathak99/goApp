@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/lib/pq"
 )
@@ -64,8 +65,7 @@ func UpdateCustomProgram(w http.ResponseWriter, r *http.Request) {
 	program.ProgramDict = string(creds.ProgramDict)
 	program.WorkoutDays = creds.WorkoutDays
 
-	print(program.Username)
-	//DB Query
+	//DB Query 1
 	query := fmt.Sprintf("UPDATE customprograms SET programdict= '%s' WHERE username = '%s';", program.ProgramDict, program.Username)
 	if _, err = db.Query(query); err != nil {
 		print(err)
@@ -73,6 +73,16 @@ func UpdateCustomProgram(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//DB Query 2
+	justString := "{" + strings.Join(program.WorkoutDays, ",") + "}"
+	query2 := fmt.Sprintf("UPDATE customprograms SET workoutdays= '%s' WHERE username = '%s';", justString, program.Username)
+	if _, err = db.Query(query2); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	//Write Response
 	rp := []byte(`{
 		"response":"Succesfully updated program"
 	}`)

@@ -545,8 +545,8 @@ func CustomProgramTestHelper(data []byte, f http.HandlerFunc, route string, quer
 func TestCustomProgram(t *testing.T) {
 	mockData1 := []byte(`{
 		"username":"testingaccount",
-		"programdict": {"Test_Key": "Test_Value"},
-		"workoutdays":["monday","wednesday","friday"]
+		"programdict": {"Test_Key1": "Test_Value1"},
+		"workoutdays":["monday","wednesday","thursday"]
 	}`)
 
 	query := "select * from customprograms where username='testingaccount'"
@@ -554,8 +554,8 @@ func TestCustomProgram(t *testing.T) {
 	program, resp := CustomProgramTestHelper(mockData1, UpdateCustomProgram, "/update_custom_program", query)
 	assert.Equal(t, 200, resp)
 	assert.Equal(t, "testingaccount", program.Username)
-	assert.Equal(t, `{"Test_Key": "Test_Value"}`, program.ProgramDict)
+	assert.Equal(t, `{"Test_Key1": "Test_Value1"}`, program.ProgramDict)
 	assert.Contains(t, program.WorkoutDays, "monday")
 	assert.Contains(t, program.WorkoutDays, "wednesday")
-	assert.Contains(t, program.WorkoutDays, "friday")
+	assert.Contains(t, program.WorkoutDays, "thursday")
 }
