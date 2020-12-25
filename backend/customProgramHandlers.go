@@ -64,6 +64,7 @@ func UpdateCustomProgram(w http.ResponseWriter, r *http.Request) {
 	program.ProgramDict = string(creds.ProgramDict)
 	program.WorkoutDays = creds.WorkoutDays
 
+	print(program.Username)
 	//DB Query
 	query := fmt.Sprintf("UPDATE customprograms SET programdict= '%s' WHERE username = '%s';", program.ProgramDict, program.Username)
 	if _, err = db.Query(query); err != nil {

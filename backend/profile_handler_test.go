@@ -536,7 +536,7 @@ func CustomProgramTestHelper(data []byte, f http.HandlerFunc, route string, quer
 
 	//DB query
 	var temp CustomProgram
-	row := db.QueryRow(query, "testingaccount")
+	row := db.QueryRow(query)
 	err = row.Scan(&temp.Username, &temp.ProgramDict, pq.Array(&temp.WorkoutDays))
 	return temp, resp.StatusCode
 }
@@ -549,7 +549,7 @@ func TestCustomProgram(t *testing.T) {
 		"workoutdays":["monday","wednesday","friday"]
 	}`)
 
-	query := "select * from customprograms where username='%s'"
+	query := "select * from customprograms where username='testingaccount'"
 
 	program, resp := CustomProgramTestHelper(mockData1, UpdateCustomProgram, "/update_custom_program", query)
 	assert.Equal(t, 200, resp)
