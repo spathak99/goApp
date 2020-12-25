@@ -83,10 +83,10 @@ func UpdateCustomProgram(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Write Response
-	rp := []byte(`{
+	ret := []byte(`{
 		"response":"Succesfully updated program"
 	}`)
-	w.Write(rp)
+	w.Write(ret)
 
 }
 

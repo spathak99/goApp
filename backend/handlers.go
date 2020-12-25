@@ -22,9 +22,9 @@ var (
 
 //Follow adds the users from the following/follower list in the respective db entries
 func Follow(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "cookie-name")
 
-	// Check if user is authenticated
+	//Authentication
+	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
@@ -66,9 +66,9 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 
 // Unfollow removes the users from the following/follower list in the respective db entries
 func Unfollow(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "cookie-name")
 
-	// Check if user is authenticated
+	//Authentication
+	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
@@ -99,9 +99,9 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 
 // UpdateDescription updates the bio of the given user in their db entry
 func UpdateDescription(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "cookie-name")
 
-	// Check if user is authenticated
+	//Authentication
+	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
@@ -124,9 +124,9 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 
 // UpdateCalories updates the calorie goals and calorie counts for the user
 func UpdateCalories(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "cookie-name")
 
-	// Check if user is authenticated
+	//Authentication
+	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
@@ -164,9 +164,9 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 
 // UpdateWeights updates the goal weight and current body weight of the user
 func UpdateWeights(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "cookie-name")
 
-	// Check if user is authenticated
+	//Authentication
+	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
@@ -272,7 +272,8 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 
 // GetUserData grabs profile struct data for the given user
 func GetUserData(w http.ResponseWriter, r *http.Request) {
-	//Start session
+
+	//Authentication
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
@@ -302,7 +303,8 @@ func GetUserData(w http.ResponseWriter, r *http.Request) {
 
 // MakePost creates a post and adds that post to the posts table
 func MakePost(w http.ResponseWriter, r *http.Request) {
-	//Start session
+
+	//Authentication
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
@@ -349,6 +351,8 @@ func reverse(posts []Post) []Post {
 
 // LikePost adds a username to the list of likes on a given post
 func LikePost(w http.ResponseWriter, r *http.Request) {
+
+	//Authentication
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
@@ -385,6 +389,8 @@ func LikePost(w http.ResponseWriter, r *http.Request) {
 
 // Unlike removes a user from the list of likes on a post
 func Unlike(w http.ResponseWriter, r *http.Request) {
+
+	//Authentication
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
@@ -425,6 +431,8 @@ func Unlike(w http.ResponseWriter, r *http.Request) {
 
 // GetFeed grabs the news feed for a given user
 func GetFeed(w http.ResponseWriter, r *http.Request) {
+
+	//Authentication
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
