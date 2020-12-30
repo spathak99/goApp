@@ -35,6 +35,7 @@ func startServer() {
 	http.HandleFunc("/initial_custom_program", InitializeProgram)
 	http.HandleFunc("/update_custom_program", UpdateCustomProgram)
 	http.HandleFunc("/get_custom_program", GetCustomProgram)
+	http.HandleFunc("/search_users", SearchUsers)
 	initDB()
 	server = &http.Server{
 		Addr:    ":8000",
