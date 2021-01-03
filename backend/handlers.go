@@ -464,7 +464,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 		var currPost Post
 		err = rows.Scan(&currPost.ID, &currPost.Username,
 			&currPost.Contents, &currPost.Media,
-			&currPost.Date)
+			&currPost.Date, pq.Array(&currPost.Likes))
 		if err != nil {
 			panic(err)
 		}
