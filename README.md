@@ -5,4 +5,4 @@ Planning/shared workouts
 Standardized Calendar integration for building your own program
 Spreadsheet viewer for premade programs
 Feed for Followers
-Progress Tracking(lifts,weight,calories)
+Progress Tracking(PR's on lifts,weight,calories)
