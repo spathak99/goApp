@@ -492,4 +492,23 @@ func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//TODO Get all feed for user
+	var postList []Post
+	rows, err := db.Query(`select * from posts where username=$1`, creds.Username)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var currPost Post
+		err = rows.Scan(&currPost.ID, &currPost.Username,
+			&currPost.Contents, &currPost.Media,
+			&currPost.Date, pq.Array(&currPost.Likes))
+		if err != nil {
+			panic(err)
+		}
+		postList = append(postList, currPost)
+	}
+	postList = reverse(postList)
+	ret, err := json.Marshal(postList)
+	w.Write(ret)
 }
