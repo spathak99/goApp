@@ -474,3 +474,22 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 	ret, err := json.Marshal(postList)
 	w.Write(ret)
 }
+
+// GetPersonalFeed grabs posts that the user made
+func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
+	//Authentication
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	}
+
+	//Credentials
+	creds := &Profile{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//TODO Get all feed for user
+}
