@@ -138,6 +138,7 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Updates Calories left
 	var currCals int
 	row := db.QueryRow("select caloriesleft from users where username=$1", creds.Username)
 	err = row.Scan(&currCals)
