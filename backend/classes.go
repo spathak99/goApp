@@ -14,6 +14,7 @@ type Profile struct {
 	Followers    []string `json:"followers",db"followers"`
 	Following    []string `json:"following",db"following"`
 	Program      string   `json:"program",db"program"`
+	Name         string   `json:"name",db"name"`
 }
 
 // Post struct
