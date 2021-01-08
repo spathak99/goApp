@@ -97,6 +97,31 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// UpdateName lets the user change their actual name that is displayed on the posts
+func UpdateName(w http.ResponseWriter, r *http.Request) {
+	//Authentication
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+	}
+
+	creds := &Profile{}
+	err := json.NewDecoder(r.Body).Decode(creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//Updates description
+	query := fmt.Sprintf("UPDATE users SET name = '%s' WHERE username = '%s';", creds.Name, creds.Username)
+	if _, err = db.Query(query); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+}
+
 // UpdateDescription updates the bio of the given user in their db entry
 func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 
