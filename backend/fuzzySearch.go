@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/lib/pq"
 )
 
 // FuzzySearch does a fuzzy search of the name of the user
@@ -22,20 +24,25 @@ func FuzzySearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//DB Query
-	var users []SearchInfo
-	rows, err := db.Query("select username, name from users where name like $1", creds.Name)
+	var users []Profile
+	rows, err := db.Query("select * from users where name like '" + creds.Name + "%'")
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var user SearchInfo
-		err = rows.Scan(&user.Username, &user.Name)
+		var user Profile
+		err = rows.Scan(&user.Username, &user.Password, &user.Description,
+			&user.GoalWeight, &user.Bodyweight,
+			&user.CalorieGoal, &user.CaloriesLeft,
+			pq.Array(&user.Followers), pq.Array(&user.Following),
+			&user.Program, &user.Name)
 		if err != nil {
 			panic(err)
 		}
 		users = append(users, user)
 	}
+	w.Header().Set("Content-Type", "application/json")
 	ret, err := json.Marshal(users)
 	w.Write(ret)
 }

@@ -119,7 +119,6 @@ func UpdateName(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 }
 
 // UpdateDescription updates the bio of the given user in their db entry
@@ -498,6 +497,8 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 		}
 		postList = append(postList, currPost)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	postList = reverse(postList)
 	ret, err := json.Marshal(postList)
 	w.Write(ret)
@@ -536,6 +537,8 @@ func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
 		}
 		postList = append(postList, currPost)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	postList = reverse(postList)
 	ret, err := json.Marshal(postList)
 	w.Write(ret)
