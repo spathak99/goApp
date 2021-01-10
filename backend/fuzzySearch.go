@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 )
 
 // FuzzySearch does a fuzzy search of the name of the user
@@ -22,43 +21,21 @@ func FuzzySearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Get Seperate Names
-	var FullName []string
-	var FirstName string
-	var LastName string
-
-	FullName = strings.Split(creds.Name, " ")
-	FirstName = FullName[0]
-	LastName = FullName[1]
-
 	//DB Query
-	var usernames []string
-	rows, err := db.Query("select username from users where name like '%%s' and name like '%s%'", FirstName, LastName)
+	var users []SearchInfo
+	rows, err := db.Query("select username, name from users where name like $1", creds.Name)
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var username string
-		err = rows.Scan(&username)
+		var user SearchInfo
+		err = rows.Scan(&user.Username, &user.Name)
 		if err != nil {
 			panic(err)
 		}
-		usernames = append(usernames, username)
+		users = append(users, user)
 	}
-
-	var names []string
-	rows, err = db.Query("select name from users where name like '%%s' and name like '%s%'", FirstName, LastName)
-	if err != nil {
-		panic(err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var name string
-		err = rows.Scan(&name)
-		if err != nil {
-			panic(err)
-		}
-		names = append(names, name)
-	}
+	ret, err := json.Marshal(users)
+	w.Write(ret)
 }

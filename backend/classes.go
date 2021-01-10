@@ -59,3 +59,9 @@ type Like struct {
 	Username string
 	ID       string
 }
+
+//SearchInfo Struct
+type SearchInfo struct {
+	Username string
+	Name     string
+}
