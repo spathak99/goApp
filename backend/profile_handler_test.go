@@ -559,3 +559,95 @@ func TestCustomProgram(t *testing.T) {
 	assert.Contains(t, program.WorkoutDays, "wednesday")
 	assert.Contains(t, program.WorkoutDays, "thursday")
 }
+
+// FuzzyTestHelper calls the fuzzysearch handler and returns the query for the test
+func FuzzyTestHelper(data []byte, f http.HandlerFunc, route string, query string) (int, []string) {
+	//Signin
+	signinData := []byte(`{
+		"username":"testingaccount",
+		"password":"password"
+	}`)
+
+	//Request
+	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(Signin)
+	handler.ServeHTTP(w, req)
+	resp := w.Result()
+	print(resp.StatusCode)
+
+	//TEST
+	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	handler = http.HandlerFunc(f)
+	handler.ServeHTTP(w, req)
+	resp = w.Result()
+
+	//Resp Body
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	//DB Query
+	var usernames []string
+	rows, err := db.Query(query)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user Profile
+		err = rows.Scan(&user.Username, &user.Password, &user.Description,
+			&user.GoalWeight, &user.Bodyweight,
+			&user.CalorieGoal, &user.CaloriesLeft,
+			pq.Array(&user.Followers), pq.Array(&user.Following),
+			&user.Program, &user.Name)
+		if err != nil {
+			panic(err)
+		}
+		usernames = append(usernames, user.Username)
+	}
+
+	return resp.StatusCode, usernames
+}
+
+// TestFuzzySearch tests if the program can search for users
+func TestFuzzySearch(t *testing.T) {
+	mockData1 := []byte(`{
+		"username":"TestingAccount",
+		"query":"Shard"
+	}`)
+
+	query1 := "select * from users where name like 'Shard%'"
+
+	resp, usernames := FuzzyTestHelper(mockData1, FuzzySearch, "/search", query1)
+	assert.Equal(t, 200, resp)
+	assert.Contains(t, usernames, "Shardool")
+	assert.Contains(t, usernames, "Shardel")
+
+	mockData2 := []byte(`{
+		"username":"TestingAccount",
+		"query":"Shardool Pa"
+	}`)
+
+	query2 := "select * from users where name like 'Shardool Pa%'"
+
+	resp2, usernames2 := FuzzyTestHelper(mockData2, FuzzySearch, "/search", query2)
+	assert.Equal(t, 200, resp2)
+	assert.Contains(t, usernames2, "Shardool")
+	assert.NotContains(t, usernames2, "Shardel")
+}
