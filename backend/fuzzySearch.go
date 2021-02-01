@@ -16,7 +16,7 @@ func FuzzySearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Creds
-	creds := &Profile{}
+	creds := &SearchInfo{}
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -25,7 +25,7 @@ func FuzzySearch(w http.ResponseWriter, r *http.Request) {
 
 	//DB Query
 	var users []Profile
-	rows, err := db.Query("select * from users where name like '" + creds.Name + "%'")
+	rows, err := db.Query("select * from users where name like '" + creds.Query + "%'")
 	if err != nil {
 		panic(err)
 	}

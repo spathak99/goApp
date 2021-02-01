@@ -63,5 +63,5 @@ type Like struct {
 //SearchInfo Struct
 type SearchInfo struct {
 	Username string
-	Name     string
+	Query    string
 }
