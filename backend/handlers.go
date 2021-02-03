@@ -5,19 +5,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
-	"github.com/gorilla/sessions"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
-)
-
-// Session Key and Store
-var (
-	key   = []byte("super-secret-key")
-	store = sessions.NewCookieStore(key)
 )
 
 //Follow adds the users from the following/follower list in the respective db entries
@@ -128,6 +122,7 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "cookie-name")
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		http.Error(w, "Forbidden", http.StatusForbidden)
+		print("reached")
 	}
 
 	creds := &Profile{}
@@ -301,7 +296,12 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 
 	//Verify Session
 	session.Values["authenticated"] = true
-	session.Save(r, w)
+
+	// Save values
+	err = session.Save(r, w)
+	if err != nil {
+		log.Fatalf("Error saving session: %v", err)
+	}
 }
 
 // GetUserData grabs profile struct data for the given user

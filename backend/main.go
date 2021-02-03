@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/sessions"
 	_ "github.com/lib/pq"
 )
 
@@ -13,7 +14,17 @@ const hashCost = 8
 var db *sql.DB
 var server *http.Server
 
+var (
+	key   = []byte("super-secret-key")
+	store = sessions.NewCookieStore(key)
+)
+
 func main() {
+	store.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   3600 * 8, // 8 hours
+		HttpOnly: true,
+	}
 	startServer()
 }
 
