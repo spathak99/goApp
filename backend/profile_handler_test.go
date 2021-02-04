@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -603,14 +604,13 @@ func FuzzyTestHelper(data []byte, f http.HandlerFunc, route string) (int, []stri
 	handler.ServeHTTP(w, req)
 	resp = w.Result()
 	res := w.Body.String()
-	print(res)
 	var usernames []string
 	var users []Profile
 
 	if err != nil {
 		panic(err)
 	}
-	//err = json.Unmarshal(res, &users)
+	err = json.Unmarshal([]byte(res), &users)
 
 	for _, entry := range users {
 		usernames = append(usernames, entry.Username)
