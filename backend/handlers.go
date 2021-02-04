@@ -35,6 +35,7 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//Decode Creds
 	creds := &FollowRelation{}
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
@@ -84,6 +85,7 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//Decode Creds
 	creds := &FollowRelation{}
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
@@ -121,6 +123,7 @@ func UpdateName(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//Decode Creds
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
@@ -151,6 +154,7 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//Decode Creds
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
@@ -181,6 +185,7 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//Decode Creds
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
@@ -200,6 +205,7 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//updates calories left
 	query2 := fmt.Sprintf("UPDATE users SET caloriesleft = '%f' WHERE username = '%s';", creds.CaloriesLeft, creds.Username)
 	if _, err = db.Query(query2); err != nil {
 		print(err)
@@ -207,6 +213,7 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//updates calorie goal
 	query3 := fmt.Sprintf("UPDATE users SET caloriegoal = '%f' WHERE username = '%s';", creds.CalorieGoal, creds.Username)
 	if _, err = db.Query(query3); err != nil {
 		print(err)
@@ -235,6 +242,7 @@ func UpdateWeights(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//Decode Creds
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
@@ -269,6 +277,8 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 // Signup creates a new entry in the users table in the db
 func Signup(w http.ResponseWriter, r *http.Request) {
+
+	//Decode Creds
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
@@ -311,6 +321,8 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	//Grabs password
 	result := db.QueryRow("select password from users where username=$1", creds.Username)
 	if err != nil {
 		session.Values["authenticated"] = false
@@ -318,6 +330,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	//Decode Creds
 	storedCreds := &Profile{}
 	err = result.Scan(&storedCreds.Password)
 	if err != nil {
@@ -378,6 +391,7 @@ func GetUserData(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
+	//Write Response
 	ret, err := json.Marshal(user)
 	w.Write(ret)
 }
@@ -511,6 +525,8 @@ func Unlike(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+
+	//Return
 	if !isLiked {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -573,6 +589,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 		postList = append(postList, currPost)
 	}
 
+	//Write response
 	w.Header().Set("Content-Type", "application/json")
 	postList = reverse(postList)
 	ret, err := json.Marshal(postList)
@@ -600,7 +617,7 @@ func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//TODO Get all feed for user
+	//Get all feed for user
 	var postList []Post
 	rows, err := db.Query(`select * from posts where username=$1`, creds.Username)
 	if err != nil {
@@ -618,6 +635,7 @@ func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
 		postList = append(postList, currPost)
 	}
 
+	//Write Response
 	w.Header().Set("Content-Type", "application/json")
 	postList = reverse(postList)
 	ret, err := json.Marshal(postList)
