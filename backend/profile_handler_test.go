@@ -641,9 +641,8 @@ func TestFuzzySearch(t *testing.T) {
 	assert.NotContains(t, usernames2, "Shardel")
 }
 
-/*
 // FeedTestHelper helps with grabbing the news feed
-func FeedTestHelper(data []byte, f http.HandlerFunc, route string) int {
+func FeedTestHelper(data []byte, f http.HandlerFunc, route string) ([]string, int) {
 	//Signin
 	signinData := []byte(`{
 		"username":"testingaccount",
@@ -663,7 +662,6 @@ func FeedTestHelper(data []byte, f http.HandlerFunc, route string) int {
 	handler := http.HandlerFunc(Signin)
 	handler.ServeHTTP(w, req)
 	resp := w.Result()
-	print(resp.StatusCode)
 
 	//TEST
 	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
@@ -677,24 +675,42 @@ func FeedTestHelper(data []byte, f http.HandlerFunc, route string) int {
 	handler = http.HandlerFunc(f)
 	handler.ServeHTTP(w, req)
 	resp = w.Result()
+	res := w.Body.String()
+
+	var usernames []string
+	var posts []Post
+
+	err = json.Unmarshal([]byte(res), &posts)
+
+	for _, entry := range posts {
+		usernames = append(usernames, entry.Username)
+	}
 
 	//Resp Body
 	_, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
 	}
-	return resp.StatusCode
+	return usernames, resp.StatusCode
 }
 
 //TestNewsFeed checks if a feed can be grabbed for a user
 func TestNewsFeed(t *testing.T) {
 	mockData := []byte(`{
-		"username":"TestingAccount",
+		"username":"testingaccount"
 	}`)
 
-	query1 := "select following from users where username='TestingAccount'"
-	query2  := "select * from feed"
-	resp := FeedTestHelper(mockData, GetFeed, "/get_feed")
-	assert.Equal(t, resp, 200)
+	query1 := "select following from users where username='testingaccount'"
+	var following []string
+	row := db.QueryRow(query1)
+	err := row.Scan(pq.Array(&following))
+	if err != nil {
+		panic(err)
+	}
 
-}*/
+	usernames, resp := FeedTestHelper(mockData, GetFeed, "/get_feed")
+	assert.Equal(t, resp, 200)
+	for _, username := range usernames {
+		assert.Contains(t, following, username)
+	}
+}

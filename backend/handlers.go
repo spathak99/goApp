@@ -566,6 +566,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&currPost.ID, &currPost.Username,
 			&currPost.Contents, &currPost.Media,
 			&currPost.Date, pq.Array(&currPost.Likes))
+		print(currPost.ID)
 		if err != nil {
 			panic(err)
 		}
