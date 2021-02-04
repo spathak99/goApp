@@ -5,34 +5,32 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
-	"github.com/gorilla/securecookie"
-	"github.com/gorilla/sessions"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
+	"github.com/quasoft/memstore"
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Session Key and Store
 var (
-	cookie = securecookie.GenerateRandomKey(32)
-	store  = sessions.NewCookieStore(cookie)
-	name   = "cookie-name"
+	key   = []byte("super-secret-key")
+	store = memstore.NewMemStore(
+		key,
+		[]byte("enckey12341234567890123456789012"),
+	)
 )
 
 //Follow adds the users from the following/follower list in the respective db entries
 func Follow(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	creds := &FollowRelation{}
@@ -74,14 +72,9 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 func Unfollow(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	creds := &FollowRelation{}
@@ -111,14 +104,9 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 // UpdateName lets the user change their actual name that is displayed on the posts
 func UpdateName(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	creds := &Profile{}
@@ -141,14 +129,10 @@ func UpdateName(w http.ResponseWriter, r *http.Request) {
 func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		print("reached")
 	}
 
 	creds := &Profile{}
@@ -171,14 +155,9 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	creds := &Profile{}
@@ -225,14 +204,9 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 func UpdateWeights(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	creds := &Profile{}
@@ -300,31 +274,24 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 // Signin signs in the user and authenticates them
 func Signin(w http.ResponseWriter, r *http.Request) {
 	//Start Session
-	session, _ := store.Get(r, name)
+	session, err := sessions.Get(r)
 
 	//User authentication below
 	creds := &Profile{}
 	err := json.NewDecoder(r.Body).Decode(creds)
 	if err != nil {
-		session.Values["authenticated"] = false
-		session.Save(r, w)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	result := db.QueryRow("select password from users where username=$1", creds.Username)
 	if err != nil {
-		session.Values["authenticated"] = false
-		session.Save(r, w)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	storedCreds := &Profile{}
 	err = result.Scan(&storedCreds.Password)
 	if err != nil {
-		session.Values["authenticated"] = false
-		session.Save(r, w)
 		if err == sql.ErrNoRows {
-
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -334,29 +301,26 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 
 	//Hash Password
 	if err = bcrypt.CompareHashAndPassword([]byte(storedCreds.Password), []byte(creds.Password)); err != nil {
-		session.Values["authenticated"] = false
-		session.Save(r, w)
 		w.WriteHeader(http.StatusUnauthorized)
-		return
 	}
 
 	//Verify Session
 	session.Values["authenticated"] = true
-	session.Save(r, w)
+
+	// Save values
+	err = session.Save(r, w)
+	if err != nil {
+		log.Fatalf("Error saving session: %v", err)
+	}
 }
 
 // GetUserData grabs profile struct data for the given user
 func GetUserData(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	//Credentials
@@ -386,14 +350,9 @@ func GetUserData(w http.ResponseWriter, r *http.Request) {
 func MakePost(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	//Credentials
@@ -439,14 +398,9 @@ func reverse(posts []Post) []Post {
 func LikePost(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	//Creds
@@ -482,14 +436,9 @@ func LikePost(w http.ResponseWriter, r *http.Request) {
 func Unlike(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	//Creds
@@ -529,14 +478,9 @@ func Unlike(w http.ResponseWriter, r *http.Request) {
 func GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	//Credentials
@@ -581,14 +525,9 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 // GetPersonalFeed grabs posts that the user made
 func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	session, _ := store.Get(r, "cookie-name")
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 
 	//Credentials

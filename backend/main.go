@@ -4,8 +4,11 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/sessions"
+
 	_ "github.com/lib/pq"
 )
 
@@ -14,22 +17,20 @@ const hashCost = 8
 var db *sql.DB
 var server *http.Server
 
-var (
-	key   = []byte("super-secret-key")
-	store = sessions.NewCookieStore(key)
-)
-
 func main() {
 	store.Options = &sessions.Options{
+		Domain:   "localhost",
 		Path:     "/",
-		MaxAge:   3600 * 8, // 8 hours
-		HttpOnly: true,
+		MaxAge:   86400 * 7,
+		HttpOnly: false,
+		Secure:   false,
 	}
 	startServer()
 }
 
 func startServer() {
 	print("Starting Server")
+
 	http.HandleFunc("/signin", Signin)
 	http.HandleFunc("/signup", Signup)
 	http.HandleFunc("/logout", Logout)
@@ -49,12 +50,20 @@ func startServer() {
 	http.HandleFunc("/get_personal_feed", GetPersonalFeed)
 	http.HandleFunc("/search", FuzzySearch)
 	http.HandleFunc("/update_name", UpdateName)
+	/*c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:8000"},
+		AllowCredentials: true,
+	})*/
+
 	initDB()
-	server = &http.Server{
-		Addr:    ":8000",
-		Handler: http.DefaultServeMux,
-	}
-	log.Fatal(server.ListenAndServe())
+	router := http.DefaultServeMux
+
+	log.Fatal(http.ListenAndServe(":8000",
+		handlers.LoggingHandler(os.Stdout, handlers.CORS(
+			handlers.AllowedMethods([]string{"POST"}),
+			handlers.AllowedOrigins([]string{"*"}),
+			handlers.AllowedHeaders([]string{"X-Requested-With"}))(router))))
+
 }
 
 func stopServer() {

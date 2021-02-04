@@ -10,10 +10,14 @@ import (
 // FuzzySearch does a fuzzy search of the name of the user
 func FuzzySearch(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, "cookie-name")
-	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		print("reached?")
+	session, _ := store.Get(r, name)
+	auth, _ := session.Values["authenticated"].(bool)
+	if !auth {
+		if _, ok := session.Values["authenticated"]; ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
 	}
 
 	//Creds

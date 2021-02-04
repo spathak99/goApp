@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gorilla/securecookie"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +22,7 @@ func TestSignin(t *testing.T) {
 
 	//Test 1
 	badSigninData := []byte(`{
-        "username":"fake_account"
+        "username":"fake_account",
         "password":"password"
     }`)
 
@@ -40,7 +41,7 @@ func TestSignin(t *testing.T) {
 	resp := w.Result()
 
 	//Assert
-	assert.Equal(t, 400, resp.StatusCode)
+	assert.Equal(t, 401, resp.StatusCode)
 
 	//Test 2
 	OKSigninData := []byte(`{
@@ -158,7 +159,6 @@ func TestCalUpdate(t *testing.T) {
 }
 
 // DescTestHelper is a helper for the description update test
-
 func DescTestHelper(data []byte) (string, int) {
 
 	//Signin
@@ -174,13 +174,15 @@ func DescTestHelper(data []byte) (string, int) {
 	}
 	req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
+	cookie := string(securecookie.GenerateRandomKey(32))
+	req.Header.Set("Cookie", cookie)
 
 	//Serve HTTP
 	w := httptest.NewRecorder()
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	handler := http.HandlerFunc(Signin)
 	handler.ServeHTTP(w, req)
 	resp := w.Result()
-	print(resp.StatusCode)
 
 	//TEST
 	req, err = http.NewRequest("POST", baseURL+"/update_bio", bytes.NewBuffer(data))
@@ -189,11 +191,13 @@ func DescTestHelper(data []byte) (string, int) {
 	}
 	req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Cookie", cookie)
 
 	//Serve HTTP
 	handler = http.HandlerFunc(UpdateDescription)
 	handler.ServeHTTP(w, req)
 	resp = w.Result()
+	print(resp.StatusCode)
 
 	//Resp Body
 	_, err = ioutil.ReadAll(resp.Body)
