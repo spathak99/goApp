@@ -855,3 +855,79 @@ func TestLiftUpdate(t *testing.T) {
 	assert.Equal(t, bMax, 250)
 	assert.Equal(t, bERM, 260)
 }
+
+//EstimateHelper is the helper for the max calculator test
+func EstimateHelper(data []byte, f http.HandlerFunc, route string) (string, int) {
+	//Signin
+	signinData := []byte(`{
+		"username":"testingaccount",
+		"password":"password"
+	}`)
+
+	//Request
+	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(Signin)
+	handler.ServeHTTP(w, req)
+	resp := w.Result()
+	print(resp.StatusCode)
+
+	//TEST
+	req, err = http.NewRequest("GET", baseURL+route, bytes.NewBuffer(data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	handler = http.HandlerFunc(f)
+	handler.ServeHTTP(w, req)
+	resp = w.Result()
+	res := w.Body.String()
+
+	return res, resp.StatusCode
+}
+
+//TestMaxCalculator tests if a one rep max estimate is valid
+func TestMaxCalculator(t *testing.T) {
+	mockData1 := []byte(`{
+		"weight": 405,
+		"reps": 3,
+		"rpe":7.5
+	}`)
+
+	ret, resp := EstimateHelper(mockData1, EstimateMax, "/estimate_max")
+	ERM, _ := strconv.Atoi(ret)
+	assert.Equal(t, resp, 200)
+	assert.Equal(t, ERM, 462)
+
+	mockData2 := []byte(`{
+		"weight": 225,
+		"reps": 3,
+		"rpe":9.5
+	}`)
+
+	ret, resp = EstimateHelper(mockData2, EstimateMax, "/estimate_max")
+	ERM, _ = strconv.Atoi(ret)
+	assert.Equal(t, resp, 200)
+	assert.Equal(t, ERM, 241)
+
+	mockData3 := []byte(`{
+		"weight": 365,
+		"reps": 1,
+		"rpe":10
+	}`)
+
+	ret, resp = EstimateHelper(mockData3, EstimateMax, "/estimate_max")
+	ERM, _ = strconv.Atoi(ret)
+	assert.Equal(t, resp, 200)
+	assert.Equal(t, ERM, 365)
+}
