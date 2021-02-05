@@ -41,9 +41,9 @@ type UserLiftsHelper struct {
 
 // Lift is struct used to calculated estimated on rep max
 type Lift struct {
-	weight int
-	reps   int
-	rpe    int
+	Weight int
+	Reps   int
+	RPE    float64
 }
 
 // Program is the struct for the program that the user can choose to upload

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 // InitializeLifts initializes the first set of lifts entered by the user
@@ -109,5 +110,11 @@ func EstimateMax(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//TODO: Estimate one rep max
+	//Calculation and response
+	reps := float64(creds.Reps)
+	weight := float64(creds.Weight)
+	ERM := int((weight) / (1.0278 - 0.0278*((10.0-creds.RPE)+reps)))
+	ret := strconv.Itoa(ERM)
+	w.Write([]byte(ret))
+
 }

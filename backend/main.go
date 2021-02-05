@@ -52,6 +52,7 @@ func startServer() {
 	http.HandleFunc("/update_name", UpdateName)
 	http.HandleFunc("/initialize_lifts", InitializeLifts)
 	http.HandleFunc("/update_lifts", UpdateLifts)
+	http.HandleFunc("/estimate_max", EstimateMax)
 
 	initDB()
 	router := http.DefaultServeMux
