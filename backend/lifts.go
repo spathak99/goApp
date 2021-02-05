@@ -86,3 +86,28 @@ func UpdateLifts(w http.ResponseWriter, r *http.Request) {
 	}`)
 	w.Write(ret)
 }
+
+//EstimateMax calculates the estimated one rep max
+func EstimateMax(w http.ResponseWriter, r *http.Request) {
+	//Authentication
+	session, _ := store.Get(r, name)
+	auth, _ := session.Values["authenticated"].(bool)
+	if !auth {
+		if _, ok := session.Values["authenticated"]; ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+	}
+
+	//Credentials
+	creds := &Lift{}
+	body, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(body, &creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//TODO: Estimate one rep max
+}

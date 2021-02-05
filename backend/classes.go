@@ -39,6 +39,13 @@ type UserLiftsHelper struct {
 	Lifts    json.RawMessage
 }
 
+// Lift is struct used to calculated estimated on rep max
+type Lift struct {
+	weight int
+	reps   int
+	rpe    int
+}
+
 // Program is the struct for the program that the user can choose to upload
 type Program struct {
 	Username    string `json:"username",db"username"`
