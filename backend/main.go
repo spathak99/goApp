@@ -51,10 +51,7 @@ func startServer() {
 	http.HandleFunc("/search", FuzzySearch)
 	http.HandleFunc("/update_name", UpdateName)
 	http.HandleFunc("/initialize_lifts", InitializeLifts)
-	/*c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8000"},
-		AllowCredentials: true,
-	})*/
+	http.HandleFunc("/update_lifts", UpdateLifts)
 
 	initDB()
 	router := http.DefaultServeMux
