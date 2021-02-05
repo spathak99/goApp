@@ -714,3 +714,50 @@ func TestNewsFeed(t *testing.T) {
 		assert.Contains(t, following, username)
 	}
 }
+
+func PersonalFeedHelper(data []byte, f http.HandlerFunc, route string) int {
+	//Signin
+
+	signinData := []byte(`{
+		"username":"Shardool",
+		"password":"Pathak"
+	}`)
+
+	//Request
+	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(Signin)
+	handler.ServeHTTP(w, req)
+	resp := w.Result()
+
+	//TEST
+	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	handler = http.HandlerFunc(f)
+	handler.ServeHTTP(w, req)
+	resp = w.Result()
+
+	return resp.StatusCode
+}
+
+//TestPersonalFeed checks if the feed for the user is retrieved
+func TestPersonalFeed(t *testing.T) {
+	mockData := []byte(`{
+		"username":"Shardool"
+	}`)
+	resp := PersonalFeedHelper(mockData, GetPersonalFeed, "/get_personal_feed")
+	assert.Equal(t, resp, 200)
+}

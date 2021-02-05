@@ -50,6 +50,7 @@ func startServer() {
 	http.HandleFunc("/get_personal_feed", GetPersonalFeed)
 	http.HandleFunc("/search", FuzzySearch)
 	http.HandleFunc("/update_name", UpdateName)
+	http.HandleFunc("/initialize_lifts", InitializeLifts)
 	/*c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:8000"},
 		AllowCredentials: true,
