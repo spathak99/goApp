@@ -761,3 +761,77 @@ func TestPersonalFeed(t *testing.T) {
 	resp := PersonalFeedHelper(mockData, GetPersonalFeed, "/get_personal_feed")
 	assert.Equal(t, resp, 200)
 }
+
+// LiftTestHelper helps with the lift test
+func LiftTestHelper(data []byte, f http.HandlerFunc, route string, query string) (UserLifts, int) {
+	//Signin
+	signinData := []byte(`{
+		"username":"testingaccount",
+		"password":"password"
+	}`)
+
+	//Request
+	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(Signin)
+	handler.ServeHTTP(w, req)
+	resp := w.Result()
+	print(resp.StatusCode)
+
+	//TEST
+	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	handler = http.HandlerFunc(f)
+	handler.ServeHTTP(w, req)
+	resp = w.Result()
+
+	//Resp Body
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	//DB query
+	var temp UserLifts
+	row := db.QueryRow(query)
+	err = row.Scan(&temp.Username, &temp.Lifts)
+	return temp, resp.StatusCode
+}
+
+//TestLiftUpdate tests if the lift dictionary was properly updated
+func TestLiftUpdate(t *testing.T) {
+	mockData1 := []byte(`{
+		"username":"testingaccount",
+		"lifts": {
+			"Deadlift": {
+				"Current Max": 450,
+				"Estimated Max": 470
+			},
+			"Squat": {
+				"Current Max": 350,
+				"Estimated Max": 365
+			},
+			"Bench": {
+				"Current Max": 240,
+				"Estimated Max": 260
+			}
+		}
+	}`)
+	query := "select * from userlifts where username='testingaccount'"
+	lifts, resp := LiftTestHelper(mockData1, UpdateLifts, "/update_lifts", query)
+	assert.Equal(t, 200, resp)
+	assert.Equal(t, "testingaccount", lifts.Username)
+}
