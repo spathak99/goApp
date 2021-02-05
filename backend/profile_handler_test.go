@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/gorilla/securecookie"
@@ -715,6 +716,7 @@ func TestNewsFeed(t *testing.T) {
 	}
 }
 
+//PersonalFeedHelper helps with the user profile feed testing
 func PersonalFeedHelper(data []byte, f http.HandlerFunc, route string) int {
 	//Signin
 
@@ -818,14 +820,14 @@ func TestLiftUpdate(t *testing.T) {
 		"lifts": {
 			"Deadlift": {
 				"Current Max": 450,
-				"Estimated Max": 470
+				"Estimated Max": 475
 			},
 			"Squat": {
 				"Current Max": 350,
 				"Estimated Max": 365
 			},
 			"Bench": {
-				"Current Max": 240,
+				"Current Max": 250,
 				"Estimated Max": 260
 			}
 		}
@@ -834,4 +836,22 @@ func TestLiftUpdate(t *testing.T) {
 	lifts, resp := LiftTestHelper(mockData1, UpdateLifts, "/update_lifts", query)
 	assert.Equal(t, 200, resp)
 	assert.Equal(t, "testingaccount", lifts.Username)
+
+	liftmap := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(lifts.Lifts), &liftmap); err != nil {
+		panic(err)
+	}
+	dlMax, _ := strconv.Atoi(fmt.Sprint(liftmap["Deadlift"].(map[string]interface{})["Current Max"]))
+	dlERM, _ := strconv.Atoi(fmt.Sprint(liftmap["Deadlift"].(map[string]interface{})["Estimated Max"]))
+	sqMax, _ := strconv.Atoi(fmt.Sprint(liftmap["Squat"].(map[string]interface{})["Current Max"]))
+	sqERM, _ := strconv.Atoi(fmt.Sprint(liftmap["Squat"].(map[string]interface{})["Estimated Max"]))
+	bMax, _ := strconv.Atoi(fmt.Sprint(liftmap["Bench"].(map[string]interface{})["Current Max"]))
+	bERM, _ := strconv.Atoi(fmt.Sprint(liftmap["Bench"].(map[string]interface{})["Estimated Max"]))
+
+	assert.Equal(t, dlMax, 450)
+	assert.Equal(t, dlERM, 475)
+	assert.Equal(t, sqMax, 350)
+	assert.Equal(t, sqERM, 365)
+	assert.Equal(t, bMax, 250)
+	assert.Equal(t, bERM, 260)
 }
