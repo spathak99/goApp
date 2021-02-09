@@ -50,6 +50,16 @@ type Lift struct {
 	Date     string
 }
 
+// LiftHelper is struct used for logging trends and calculating maxes
+type LiftHelper struct {
+	Name   string
+	Weight int
+	Reps   int
+	Sets   int
+	RPE    float64
+	Date   string
+}
+
 // Program is the struct for the program that the user can choose to upload
 type Program struct {
 	Username    string `json:"username",db"username"`

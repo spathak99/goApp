@@ -207,8 +207,24 @@ func GrabLog(w http.ResponseWriter, r *http.Request) {
 	err = row.Scan(pq.Array(&liftlog))
 
 	//Loop
+	var trendLifts []string
 	for _, lift := range liftlog {
-		print(lift)
-		//TODO Filter out lifts that contain excersize
+		srcjson := []byte(lift)
+		var helper LiftHelper
+		err := json.Unmarshal(srcjson, &helper)
+		if err != nil {
+			panic(err)
+		}
+
+		if helper.Name == creds.Name {
+			out, err := json.Marshal(helper)
+			if err != nil {
+				panic(err)
+			}
+			trendLifts = append(trendLifts, string(out))
+		}
 	}
+
+	//Write Response
+	w.Write([]byte(fmt.Sprint(trendLifts)))
 }
