@@ -141,22 +141,11 @@ func LogExercise(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	inp, _ := json.Marshal(creds)
 
 	var currLifts []string
 	row := db.QueryRow("select lifts from exerciselog where username=$1", creds.Username)
 	err = row.Scan(pq.Array(&currLifts))
-	print(len(currLifts))
-
-	//Conversion
-	dump := map[string]interface{}{
-		"Name":   creds.Name,
-		"Weight": creds.Weight,
-		"Reps":   creds.Reps,
-		"Sets":   creds.Sets,
-		"RPE":    creds.RPE,
-		"Date":   creds.Date,
-	}
-	inp, _ := json.Marshal(dump)
 
 	//Query
 	if len(currLifts) == 0 {
@@ -210,7 +199,7 @@ func GrabLog(w http.ResponseWriter, r *http.Request) {
 	var trendLifts []string
 	for _, lift := range liftlog {
 		srcjson := []byte(lift)
-		var helper LiftHelper
+		var helper Lift
 		err := json.Unmarshal(srcjson, &helper)
 		if err != nil {
 			panic(err)
