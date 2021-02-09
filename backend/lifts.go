@@ -177,5 +177,38 @@ func LogExercise(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+}
 
+//GrabLog gets the logged excersizes by lift
+func GrabLog(w http.ResponseWriter, r *http.Request) {
+	//Authentication
+	session, _ := store.Get(r, name)
+	auth, _ := session.Values["authenticated"].(bool)
+	if !auth {
+		if _, ok := session.Values["authenticated"]; ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+	}
+
+	//Credentials
+	creds := &Lift{}
+	body, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(body, &creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//Query
+	var liftlog []string
+	row := db.QueryRow("select lifts from exerciselog where username=$1", creds.Username)
+	err = row.Scan(pq.Array(&liftlog))
+
+	//Loop
+	for _, lift := range liftlog {
+		print(lift)
+		//TODO Filter out lifts that contain excersize
+	}
 }

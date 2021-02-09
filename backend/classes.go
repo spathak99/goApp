@@ -39,7 +39,7 @@ type UserLiftsHelper struct {
 	Lifts    json.RawMessage
 }
 
-// Lift is struct used to calculated estimated on rep max
+// Lift is struct used for logging trends and calculating maxes
 type Lift struct {
 	Username string
 	Name     string
