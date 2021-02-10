@@ -48,6 +48,7 @@ type Lift struct {
 	Sets     int
 	RPE      float64
 	Date     string
+	PR       bool
 }
 
 // Program is the struct for the program that the user can choose to upload

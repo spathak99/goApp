@@ -142,7 +142,6 @@ func LogExercise(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	inp, _ := json.Marshal(creds)
-
 	var currLifts []string
 	row := db.QueryRow("select lifts from exerciselog where username=$1", creds.Username)
 	err = row.Scan(pq.Array(&currLifts))
@@ -168,7 +167,7 @@ func LogExercise(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//GrabLog gets the logged excersizes by lift
+//GrabLog gets the logged exercises by lift
 func GrabLog(w http.ResponseWriter, r *http.Request) {
 	//Authentication
 	session, _ := store.Get(r, name)
