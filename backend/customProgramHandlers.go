@@ -37,13 +37,16 @@ func InitializeProgram(w http.ResponseWriter, r *http.Request) {
 	program.Username = creds.Username
 	program.ProgramDict = string(creds.ProgramDict)
 	program.WorkoutDays = creds.WorkoutDays
+	program.StartDate = creds.StartDate
 
 	//DB Query
-	query := "insert into customprograms values ($1,$2,$3)"
+	query := "insert into customprograms values ($1,$2,$3,$4)"
+
 	if _, err = db.Query(query,
 		program.Username,
 		string(program.ProgramDict),
-		pq.Array(program.WorkoutDays)); err != nil {
+		pq.Array(program.WorkoutDays),
+		string(program.StartDate)); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -76,6 +79,7 @@ func UpdateCustomProgram(w http.ResponseWriter, r *http.Request) {
 	program.Username = creds.Username
 	program.ProgramDict = string(creds.ProgramDict)
 	program.WorkoutDays = creds.WorkoutDays
+	program.StartDate = creds.StartDate
 
 	//DB Query 1
 	query := fmt.Sprintf("UPDATE customprograms SET programdict= '%s' WHERE username = '%s';", program.ProgramDict, program.Username)
@@ -89,6 +93,14 @@ func UpdateCustomProgram(w http.ResponseWriter, r *http.Request) {
 	justString := "{" + strings.Join(program.WorkoutDays, ",") + "}"
 	query2 := fmt.Sprintf("UPDATE customprograms SET workoutdays= '%s' WHERE username = '%s';", justString, program.Username)
 	if _, err = db.Query(query2); err != nil {
+		print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	//DB Query 3
+	query3 := fmt.Sprintf("UPDATE customprograms SET startdate = '%s' WHERE username = '%s';", program.StartDate, program.Username)
+	if _, err = db.Query(query3); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -128,12 +140,13 @@ func GetCustomProgram(w http.ResponseWriter, r *http.Request) {
 	//Grab program from database
 	var TempProgram CustomProgram
 	row := db.QueryRow(`select * from customprograms where username=$1`, creds.Username)
-	err = row.Scan(&TempProgram.Username, &TempProgram.ProgramDict, pq.Array(&TempProgram.WorkoutDays))
+	err = row.Scan(&TempProgram.Username, &TempProgram.ProgramDict, pq.Array(&TempProgram.WorkoutDays), &TempProgram.StartDate)
 
 	//Switch to helper struct
 	program.Username = TempProgram.Username
 	program.ProgramDict = []byte(TempProgram.ProgramDict)
 	program.WorkoutDays = TempProgram.WorkoutDays
+	program.StartDate = TempProgram.StartDate
 
 	//Write Response
 	ret, err := json.Marshal(program)

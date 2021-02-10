@@ -63,6 +63,7 @@ type CustomProgramHelper struct {
 	Username    string
 	ProgramDict json.RawMessage
 	WorkoutDays []string
+	StartDate   string
 }
 
 // CustomProgram is the struct for a program that the user can chose to create
@@ -70,6 +71,7 @@ type CustomProgram struct {
 	Username    string   `json:"username",db"username"`
 	ProgramDict string   `json:"programdict",db"programdict"`
 	WorkoutDays []string `json:"workoutdays",db"workoutdays"`
+	StartDate   string   `json:"startdate",db"startdate"`
 }
 
 // FollowRelation is the struct for follower/following relationship

@@ -502,7 +502,7 @@ func TestLikes(t *testing.T) {
 }
 
 // CustomProgramTestHelper helps with the program test
-func CustomProgramTestHelper(data []byte, f http.HandlerFunc, route string, query string) (CustomProgram, int) {
+func CustomProgramTestHelper(data []byte, f http.HandlerFunc, route string, data2 []byte, f2 http.HandlerFunc, route2 string) (CustomProgramHelper, int) {
 	//Signin
 	signinData := []byte(`{
 		"username":"testingaccount",
@@ -522,7 +522,6 @@ func CustomProgramTestHelper(data []byte, f http.HandlerFunc, route string, quer
 	handler := http.HandlerFunc(Signin)
 	handler.ServeHTTP(w, req)
 	resp := w.Result()
-	print(resp.StatusCode)
 
 	//TEST
 	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
@@ -533,9 +532,11 @@ func CustomProgramTestHelper(data []byte, f http.HandlerFunc, route string, quer
 	req.Header.Set("Content-Type", "application/json")
 
 	//Serve HTTP
+	w = httptest.NewRecorder()
 	handler = http.HandlerFunc(f)
 	handler.ServeHTTP(w, req)
 	resp = w.Result()
+	StatusCode := resp.StatusCode
 
 	//Resp Body
 	_, err = ioutil.ReadAll(resp.Body)
@@ -543,11 +544,27 @@ func CustomProgramTestHelper(data []byte, f http.HandlerFunc, route string, quer
 		panic(err)
 	}
 
-	//DB query
-	var temp CustomProgram
-	row := db.QueryRow(query)
-	err = row.Scan(&temp.Username, &temp.ProgramDict, pq.Array(&temp.WorkoutDays))
-	return temp, resp.StatusCode
+	//Get
+	req, err = http.NewRequest("GET", baseURL+route2, bytes.NewBuffer(data2))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	w = httptest.NewRecorder()
+	handler = http.HandlerFunc(f2)
+	handler.ServeHTTP(w, req)
+	resp = w.Result()
+	res := w.Body.String()
+
+	//Marshal
+	var temp CustomProgramHelper
+	err = json.Unmarshal([]byte(res), &temp)
+
+	return temp, StatusCode
+
 }
 
 // TestCustomProgram tests if the program is updated correctly
@@ -555,18 +572,29 @@ func TestCustomProgram(t *testing.T) {
 	mockData1 := []byte(`{
 		"username":"testingaccount",
 		"programdict": {"Test_Key1": "Test_Value1"},
-		"workoutdays":["monday","wednesday","friday"]
+		"workoutdays":["monday","wednesday","friday"],
+		"startdate":"02/13/2021"
 	}`)
 
-	query := "select * from customprograms where username='testingaccount'"
+	getData1 := []byte(`{
+		"username":"testingaccount"
+	}`)
 
-	program, resp := CustomProgramTestHelper(mockData1, UpdateCustomProgram, "/update_custom_program", query)
+	program, resp := CustomProgramTestHelper(mockData1, UpdateCustomProgram, "/update_custom_program", getData1, GetCustomProgram, "/get_custom_program")
+
+	var mp map[string]interface{}
+	err := json.Unmarshal([]byte(program.ProgramDict), &mp)
+	if err != nil {
+		panic(err)
+	}
+
 	assert.Equal(t, 200, resp)
 	assert.Equal(t, "testingaccount", program.Username)
-	assert.Equal(t, `{"Test_Key1": "Test_Value1"}`, program.ProgramDict)
+	assert.Equal(t, mp["Test_Key1"], "Test_Value1")
 	assert.Contains(t, program.WorkoutDays, "monday")
 	assert.Contains(t, program.WorkoutDays, "wednesday")
 	assert.Contains(t, program.WorkoutDays, "friday")
+	assert.Equal(t, program.StartDate, "02/13/2021")
 }
 
 // FuzzyTestHelper calls the fuzzysearch handler and returns the query for the test
