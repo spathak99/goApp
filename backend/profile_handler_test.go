@@ -931,3 +931,69 @@ func TestMaxCalculator(t *testing.T) {
 	assert.Equal(t, resp, 200)
 	assert.Equal(t, ERM, 365)
 }
+
+//Helper for testing if posts are made
+func PostTestHelper(data []byte, f http.HandlerFunc, route string) int {
+	//Signin
+	signinData := []byte(`{
+		"username":"testingaccount",
+		"password":"password"
+	}`)
+
+	//Request
+	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(Signin)
+	handler.ServeHTTP(w, req)
+	resp := w.Result()
+	print(resp.StatusCode)
+
+	//TEST
+	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	handler = http.HandlerFunc(f)
+	handler.ServeHTTP(w, req)
+	resp = w.Result()
+
+	return resp.StatusCode
+}
+
+//TestPost tests is a post can be made
+func TestPost(t *testing.T) {
+	mockData1 := []byte(`{
+		"id":"none",
+		"username":"testingaccount",
+		"contents": "Mr Test Account PR'd on squat for 3 sets of 3 at 450lbs",
+		"media":"www.linktomedia.xyz",
+		"date":"10/02/2021",
+		"likes":[]
+	}`)
+
+	resp := PostTestHelper(mockData1, MakePost, "/make_post")
+	assert.Equal(t, resp, 200)
+
+	mockData2 := []byte(`{
+		"id":"none",
+		"username":"testingaccount",
+		"contents": "Mr Test Account PR'd on deadlift for 1 set of 6  at 405lbs",
+		"media":"www.linktomedia242.xyz",
+		"date":"10/02/2021",
+		"likes":[]
+	}`)
+
+	resp = PostTestHelper(mockData2, MakePost, "/make_post")
+	assert.Equal(t, resp, 200)
+}
