@@ -21,6 +21,68 @@ var (
 	name   = "cookie-name"
 )
 
+//GetFollowing gets a list of the people the user follows
+func GetFollowing(w http.ResponseWriter, r *http.Request) {
+	//Authentication
+	session, _ := store.Get(r, name)
+	auth, _ := session.Values["authenticated"].(bool)
+	if !auth {
+		if _, ok := session.Values["authenticated"]; ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+	}
+
+	//Decode Creds
+	creds := map[string]interface{}{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//Query
+	username := creds["username"].(string)
+	var following []string
+	row := db.QueryRow("select following from users where username=$1", username)
+	err = row.Scan(pq.Array(&following))
+
+	ret, err := json.Marshal(following)
+	w.Write(ret)
+}
+
+//GetFollowers gets a list of your followers
+func GetFollowers(w http.ResponseWriter, r *http.Request) {
+	//Authentication
+	session, _ := store.Get(r, name)
+	auth, _ := session.Values["authenticated"].(bool)
+	if !auth {
+		if _, ok := session.Values["authenticated"]; ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+	}
+
+	//Decode Creds
+	creds := map[string]interface{}{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//Query
+	username := creds["username"].(string)
+	var followers []string
+	row := db.QueryRow("select followers from users where username=$1", username)
+	err = row.Scan(pq.Array(&followers))
+
+	ret, err := json.Marshal(followers)
+	w.Write(ret)
+}
+
 //Follow adds the users from the following/follower list in the respective db entries
 func Follow(w http.ResponseWriter, r *http.Request) {
 
@@ -372,9 +434,9 @@ func GetUserData(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	//Credentials
-	creds := &Profile{}
-	err := json.NewDecoder(r.Body).Decode(creds)
+	//Decode Creds
+	creds := map[string]interface{}{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -382,7 +444,8 @@ func GetUserData(w http.ResponseWriter, r *http.Request) {
 
 	//Grabs user data from db
 	var user Profile
-	row := db.QueryRow("select * from users where username=$1", creds.Username)
+	username := creds["username"].(string)
+	row := db.QueryRow("select * from users where username=$1", username)
 	err = row.Scan(&user.Username, &user.Password, &user.Description,
 		&user.GoalWeight, &user.Bodyweight,
 		&user.CalorieGoal, &user.CaloriesLeft,
@@ -555,9 +618,9 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	//Credentials
-	creds := &Profile{}
-	err := json.NewDecoder(r.Body).Decode(creds)
+	//Decode Creds
+	creds := map[string]interface{}{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -565,7 +628,8 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	//Gets all users that current user is following
 	var following []string
-	row := db.QueryRow("select following from users where username=$1", creds.Username)
+	username := creds["username"].(string)
+	row := db.QueryRow("select following from users where username=$1", username)
 	err = row.Scan(pq.Array(&following))
 
 	//Gets all posts for news feed
@@ -608,9 +672,9 @@ func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	//Credentials
-	creds := &Profile{}
-	err := json.NewDecoder(r.Body).Decode(creds)
+	//Decode Creds
+	creds := map[string]interface{}{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -618,7 +682,8 @@ func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
 
 	//Get all feed for user
 	var postList []Post
-	rows, err := db.Query(`select * from posts where username=$1`, creds.Username)
+	username := creds["username"].(string)
+	rows, err := db.Query(`select * from posts where username=$1`, username)
 	if err != nil {
 		panic(err)
 	}

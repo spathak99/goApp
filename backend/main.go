@@ -38,6 +38,8 @@ func startServer() {
 	http.HandleFunc("/update_weight", UpdateWeights)
 	http.HandleFunc("/update_calories", UpdateCalories)
 	http.HandleFunc("/get_user_data", GetUserData)
+	http.HandleFunc("/get_followers", GetFollowers)
+	http.HandleFunc("/get_following", GetFollowing)
 	http.HandleFunc("/follow", Follow)
 	http.HandleFunc("/unfollow", Unfollow)
 	http.HandleFunc("/make_post", MakePost)
