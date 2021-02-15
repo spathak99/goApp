@@ -34,6 +34,7 @@ func startServer() {
 	mux.HandleFunc("/signin", Signin)
 	mux.HandleFunc("/signup", Signup)
 	mux.HandleFunc("/logout", Logout)
+	mux.HandleFunc("/get_all_users", getUsers)
 	mux.HandleFunc("/update_bio", UpdateDescription)
 	mux.HandleFunc("/update_weight", UpdateWeights)
 	mux.HandleFunc("/update_calories", UpdateCalories)

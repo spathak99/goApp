@@ -21,6 +21,47 @@ var (
 	name   = "cookie-name"
 )
 
+//GetUsers gets all users except the current user
+func getUsers(w http.ResponseWriter, r *http.Request) {
+	//Authentication
+	session, _ := store.Get(r, name)
+	auth, _ := session.Values["authenticated"].(bool)
+	if !auth {
+		if _, ok := session.Values["authenticated"]; ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+	}
+
+	//Decode Creds
+	creds := map[string]interface{}{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//Query and response
+	var users []string
+	sqlRaw := fmt.Sprintf(`select username from users`)
+	rows, err := db.Query(sqlRaw)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user string
+		err = rows.Scan(&user)
+		if err != nil {
+			panic(err)
+		}
+		users = append(users, user)
+	}
+	ret, err := json.Marshal(users)
+	w.Write(ret)
+}
+
 //GetFollowing gets a list of the people the user follows
 func GetFollowing(w http.ResponseWriter, r *http.Request) {
 	//Authentication
