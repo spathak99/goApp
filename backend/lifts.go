@@ -102,6 +102,23 @@ func GetUserMax(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	//Credentials
+	creds := map[string]interface{}{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//Gets lifts of user
+	var lifts string
+	username := creds["username"].(string)
+	row := db.QueryRow("select lifts from userlifts where username=$1", username)
+	err = row.Scan(&lifts)
+
+	ret := []byte(lifts)
+	w.Write(ret)
 }
 
 //EstimateMax calculates the estimated one rep max
