@@ -90,6 +90,20 @@ func UpdateLifts(w http.ResponseWriter, r *http.Request) {
 	w.Write(ret)
 }
 
+//GetUserMax gets the max of the user
+func GetUserMax(w http.ResponseWriter, r *http.Request) {
+	//Authentication
+	session, _ := store.Get(r, name)
+	auth, _ := session.Values["authenticated"].(bool)
+	if !auth {
+		if _, ok := session.Values["authenticated"]; ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+	}
+}
+
 //EstimateMax calculates the estimated one rep max
 func EstimateMax(w http.ResponseWriter, r *http.Request) {
 	//Authentication

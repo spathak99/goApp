@@ -54,6 +54,7 @@ func startServer() {
 	mux.HandleFunc("/search", FuzzySearch)
 	mux.HandleFunc("/update_name", UpdateName)
 	mux.HandleFunc("/initialize_lifts", InitializeLifts)
+	mux.HandleFunc("/get_user_max", GetUserMax)
 	mux.HandleFunc("/update_lifts", UpdateLifts)
 	mux.HandleFunc("/estimate_max", EstimateMax)
 	mux.HandleFunc("/logexercise", LogExercise)
