@@ -50,6 +50,7 @@ func startServer() {
 	mux.HandleFunc("/initial_custom_program", InitializeProgram)
 	mux.HandleFunc("/update_custom_program", UpdateCustomProgram)
 	mux.HandleFunc("/get_custom_program", GetCustomProgram)
+	mux.HandleFunc("/get_post", GetPost)
 	mux.HandleFunc("/get_personal_feed", GetPersonalFeed)
 	mux.HandleFunc("/search", FuzzySearch)
 	mux.HandleFunc("/update_name", UpdateName)

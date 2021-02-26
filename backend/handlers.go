@@ -746,3 +746,38 @@ func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
 	ret, err := json.Marshal(postList)
 	w.Write(ret)
 }
+
+// GetPost grabs an individual post by ID
+func GetPost(w http.ResponseWriter, r *http.Request) {
+	//Authentication
+	session, _ := store.Get(r, name)
+	auth, _ := session.Values["authenticated"].(bool)
+	if !auth {
+		if _, ok := session.Values["authenticated"]; ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+	}
+
+	//Decode Creds
+	creds := map[string]interface{}{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//Query post
+	id := creds["id"].(string)
+	row := db.QueryRow(`select * from posts where id=$1`, id)
+	var currPost Post
+	err = row.Scan(&currPost.ID, &currPost.Username,
+		&currPost.Contents, &currPost.Media,
+		&currPost.Date, pq.Array(&currPost.Likes))
+
+	//Write Response
+	w.Header().Set("Content-Type", "application/json")
+	ret, err := json.Marshal(currPost)
+	w.Write(ret)
+}
