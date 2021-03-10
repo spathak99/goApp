@@ -501,7 +501,7 @@ func TestLikes(t *testing.T) {
 	assert.NotContains(t, likes2, "testingaccount")
 }
 
-// CustomProgramTestHelper helps with the program test
+/*// CustomProgramTestHelper helps with the program test
 func CustomProgramTestHelper(data []byte, f http.HandlerFunc, route string, data2 []byte, f2 http.HandlerFunc, route2 string) (CustomProgramHelper, int) {
 	//Signin
 	signinData := []byte(`{
@@ -595,7 +595,7 @@ func TestCustomProgram(t *testing.T) {
 	assert.Contains(t, program.WorkoutDays, "wednesday")
 	assert.Contains(t, program.WorkoutDays, "friday")
 	assert.Equal(t, program.StartDate, "02/13/2021")
-}
+}*/
 
 // FuzzyTestHelper calls the fuzzysearch handler and returns the query for the test
 func FuzzyTestHelper(data []byte, f http.HandlerFunc, route string) (int, []string) {

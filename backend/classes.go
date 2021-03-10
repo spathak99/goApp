@@ -58,20 +58,10 @@ type Program struct {
 	StartDate   string `json:"startdate",db"startdate"`
 }
 
-// CustomProgramHelper is the struct that does not communicate with the DB
-type CustomProgramHelper struct {
-	Username    string
-	ProgramDict json.RawMessage
-	WorkoutDays []string
-	StartDate   string
-}
-
 // CustomProgram is the struct for a program that the user can chose to create
 type CustomProgram struct {
-	Username    string   `json:"username",db"username"`
-	ProgramDict string   `json:"programdict",db"programdict"`
-	WorkoutDays []string `json:"workoutdays",db"workoutdays"`
-	StartDate   string   `json:"startdate",db"startdate"`
+	Username    string          `json:"username",db"username"`
+	ProgramList json.RawMessage `json:"programlist",db"programlist"`
 }
 
 // FollowRelation is the struct for follower/following relationship
