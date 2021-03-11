@@ -64,6 +64,12 @@ type CustomProgram struct {
 	ProgramList json.RawMessage `json:"programlist",db"programlist"`
 }
 
+// CustomProgram helper writes the program as a string
+type CustomProgramHelper struct {
+	Username    string `json:"username",db"username"`
+	ProgramList string `json:"programlist",db"programlist"`
+}
+
 // FollowRelation is the struct for follower/following relationship
 type FollowRelation struct {
 	Follower  string

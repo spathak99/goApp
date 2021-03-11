@@ -35,7 +35,7 @@ func InitializeProgram(w http.ResponseWriter, r *http.Request) {
 
 	if _, err = db.Query(query,
 		creds.Username,
-		creds.ProgramList,
+		string(creds.ProgramList),
 	); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -67,6 +67,7 @@ func UpdateCustomProgram(w http.ResponseWriter, r *http.Request) {
 
 	//DB Query 1
 	input := string(creds.ProgramList)
+	print(input)
 	query := fmt.Sprintf("UPDATE customprograms SET programlist= '%s' WHERE username = '%s';", input, creds.Username)
 	if _, err = db.Query(query); err != nil {
 		fmt.Printf("%s", err)
@@ -103,7 +104,7 @@ func GetCustomProgram(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Grab program from database
-	var program CustomProgram
+	var program CustomProgramHelper
 	username := creds["username"].(string)
 	row := db.QueryRow(`select * from customprograms where username=$1`, username)
 	err = row.Scan(&program.Username, &program.ProgramList)
