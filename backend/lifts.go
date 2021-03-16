@@ -235,7 +235,7 @@ func GrabLog(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		if helper.Name == creds.Name {
+		if helper.Username == creds.Username {
 			out, err := json.Marshal(helper)
 			if err != nil {
 				panic(err)
