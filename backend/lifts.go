@@ -10,6 +10,7 @@ import (
 	"github.com/lib/pq"
 )
 
+
 // InitializeLifts initializes the first set of lifts entered by the user
 func InitializeLifts(w http.ResponseWriter, r *http.Request) {
 	//Authentication
@@ -198,6 +199,19 @@ func LogExercise(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Unique returns unique array
+func Unique(slice []string) []string {
+    keys := make(map[string]bool)
+    list := []string{}
+    for _, entry := range slice {
+        if _, value := keys[entry]; !value {
+            keys[entry] = true
+            list = append(list, entry)
+        }
+    }    
+    return list
+}
+
 //GetLiftNames gets all the types of lifts that have been logged
 func GetLiftNames(w http.ResponseWriter, r *http.Request){
 	//Authentication
@@ -225,7 +239,7 @@ func GetLiftNames(w http.ResponseWriter, r *http.Request){
 	err = row.Scan(pq.Array(&liftlog))
 
 	//Get Names
-	var ret []string
+	var temp []string
 	for _, lift := range liftlog {
 		srcjson := []byte(lift)
 		var helper Lift
@@ -233,8 +247,9 @@ func GetLiftNames(w http.ResponseWriter, r *http.Request){
 		if err != nil {
 			panic(err)
 		}
-		ret = append(ret,helper.Name)
+		temp = append(temp,helper.Name)
 	}
+	var ret = Unique(temp)
 	w.Write([]byte(fmt.Sprint(ret)))
 }
 
