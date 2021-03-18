@@ -198,6 +198,46 @@ func LogExercise(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//GetLiftNames gets all the types of lifts that have been logged
+func GetLiftNames(w http.ResponseWriter, r *http.Request){
+	//Authentication
+	session, _ := store.Get(r, name)
+	auth, _ := session.Values["authenticated"].(bool)
+	if !auth {
+		if _, ok := session.Values["authenticated"]; ok {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+	}
+
+	//Credentials
+	creds := map[string]interface{}{}
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	//DB Query
+	var username = creds["username"].(string)
+	var liftlog []string
+	row := db.QueryRow("select lifts from exerciselog where username=$1", username)
+	err = row.Scan(pq.Array(&liftlog))
+
+	//Get Names
+	var ret []string
+	for _, lift := range liftlog {
+		srcjson := []byte(lift)
+		var helper Lift
+		err := json.Unmarshal(srcjson, &helper)
+		if err != nil {
+			panic(err)
+		}
+		ret = append(ret,helper.Name)
+	}
+	w.Write([]byte(fmt.Sprint(ret)))
+}
+
 //GrabLog gets the logged exercises by lift
 func GrabLog(w http.ResponseWriter, r *http.Request) {
 	//Authentication
@@ -225,6 +265,7 @@ func GrabLog(w http.ResponseWriter, r *http.Request) {
 	row := db.QueryRow("select lifts from exerciselog where username=$1", creds.Username)
 	err = row.Scan(pq.Array(&liftlog))
 
+
 	//Loop
 	var trendLifts []string
 	for _, lift := range liftlog {
@@ -235,7 +276,7 @@ func GrabLog(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		if helper.Username == creds.Username {
+		if helper.Name == creds.Name {
 			out, err := json.Marshal(helper)
 			if err != nil {
 				panic(err)

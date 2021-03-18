@@ -59,11 +59,11 @@ func startServer() {
 	mux.HandleFunc("/update_lifts", UpdateLifts)
 	mux.HandleFunc("/estimate_max", EstimateMax)
 	mux.HandleFunc("/logexercise", LogExercise)
+	mux.HandleFunc("/get_lifts",GetLiftNames)
 	mux.HandleFunc("/grablog", GrabLog)
 	initDB()
 	handler := cors.Default().Handler(mux)
 	http.ListenAndServe(":8000", handler)
-
 }
 
 func stopServer() {
