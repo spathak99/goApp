@@ -249,9 +249,10 @@ func GetLiftNames(w http.ResponseWriter, r *http.Request){
 		}
 		temp = append(temp,helper.Name)
 	}
-	var ret = Unique(temp)
-	response, err := json.Marshal(ret)
-	w.Write(response)
+
+	var result = Unique(temp)
+	response, err := json.Marshal(result)
+	w.Write([]byte(fmt.Sprintf(`{"lifts": %s }`, response)))
 }
 
 //GrabLog gets the logged exercises by lift
