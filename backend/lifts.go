@@ -250,7 +250,8 @@ func GetLiftNames(w http.ResponseWriter, r *http.Request){
 		temp = append(temp,helper.Name)
 	}
 	var ret = Unique(temp)
-	w.Write([]byte(fmt.Sprint(ret)))
+	response, err := json.Marshal(ret)
+	w.Write(response)
 }
 
 //GrabLog gets the logged exercises by lift
@@ -303,3 +304,5 @@ func GrabLog(w http.ResponseWriter, r *http.Request) {
 	//Write Response
 	w.Write([]byte(fmt.Sprint(trendLifts)))
 }
+
+
