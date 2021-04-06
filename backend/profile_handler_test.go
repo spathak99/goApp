@@ -932,7 +932,7 @@ func TestPost(t *testing.T) {
 }
 
 //Helper for testing if posts are made
-func LogTestHelper(data []byte, f http.HandlerFunc, route string) int {
+func LogTestHelper(data []byte, f http.HandlerFunc, route string) (int,string) {
 	//Signin
 	signinData := []byte(`{
 		"username":"testingaccount",
@@ -966,9 +966,11 @@ func LogTestHelper(data []byte, f http.HandlerFunc, route string) int {
 	handler = http.HandlerFunc(f)
 	handler.ServeHTTP(w, req)
 	resp = w.Result()
+	res := w.Body.String()
 
-	return resp.StatusCode
+	return resp.StatusCode,res
 }
+
 
 //TestLog tests is a post can be made
 func TestLog(t *testing.T) {
@@ -976,6 +978,20 @@ func TestLog(t *testing.T) {
 		"username":"testingaccount"
 	}`)
 
-	resp := LogTestHelper(mockData1, GetLiftNames, "/get_lifts")
-	assert.Equal(t, resp, 200)
+	statusCode,_ := LogTestHelper(mockData1, GetLiftNames, "/get_lifts")
+	assert.Equal(t, statusCode, 200)
+
+	mockData2 := []byte(`{
+		"username":"testingaccount",
+		"name":"Fake Lift",
+		"weight":135,
+		"reps": 1,
+		"sets": 3,
+		"rpe": 9.5,
+		"date": "09/05/2020",
+		"pr":true
+	}`)
+
+	statusCode,_ = LogTestHelper(mockData2, LogExercise, "/logexercise")
+	assert.Equal(t, statusCode, 200)
 }
