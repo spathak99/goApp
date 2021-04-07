@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 
-	"github.com/gorilla/securecookie"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
@@ -158,56 +156,15 @@ func TestCalUpdate(t *testing.T) {
 }
 
 // DescTestHelper is a helper for the description update test
-func DescTestHelper(data []byte) (string, int) {
-
-	//Signin
-	signinData := []byte(`{
-        "username":"testingaccount",
-        "password":"password"
-    }`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-	cookie := string(securecookie.GenerateRandomKey(32))
-	req.Header.Set("Cookie", cookie)
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-
-	//TEST
-	req, err = http.NewRequest("POST", baseURL+"/update_bio", bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Cookie", cookie)
-
-	//Serve HTTP
-	handler = http.HandlerFunc(UpdateDescription)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-	print(resp.StatusCode)
-
-	//Resp Body
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
+func DescTestHelper() string {
 	var desc string
 	row := db.QueryRow("select description from users where username=$1", "testingaccount")
-	err = row.Scan(&desc)
+	err := row.Scan(&desc)
+	if(err != nil){
+		panic(err)
+	}
 
-	return desc, resp.StatusCode
+	return desc
 }
 
 // TestDescUpdate tests if the user bio update works as intended
@@ -233,66 +190,34 @@ func TestDescUpdate(t *testing.T) {
     }`)
 
 	//Test 1
-	desc1, resp1 := DescTestHelper(mockData1)
+	resp1,_ := GenericHelper(mockData1,UpdateDescription,"/update_bio")
+	desc1 := DescTestHelper()
 	assert.Equal(t, 200, resp1)
 	assert.Equal(t, "Test Bio 1", desc1)
 
 	//Test 2
-	desc2, resp2 := DescTestHelper(mockData2)
+	resp2,_ := GenericHelper(mockData2,UpdateDescription,"/update_bio")
 	assert.Equal(t, 200, resp2)
+	desc2 := DescTestHelper()
 	assert.Equal(t, "Test Bio 3", desc2)
 }
 
 // WeightTestHelper is the helper function for the weight update test
-func WeightTestHelper(data []byte, query1 string, query2 string) (int, int, int) {
-	//Signin
-	signinData := []byte(`{
-        "username":"testingaccount",
-        "password":"password"
-    }`)
+func WeightTestHelper(query1 string, query2 string) (int, int) {
 
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-	print(resp.StatusCode)
-
-	//TEST
-	req, err = http.NewRequest("POST", baseURL+"/update_weight", bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(UpdateWeights)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-
-	//Resp Body + DB Query
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
 	var weight int
 	row := db.QueryRow(query1, "testingaccount")
-	err = row.Scan(&weight)
+	err := row.Scan(&weight)
 
 	var goalWeight int
 	row = db.QueryRow(query2, "testingaccount")
 	err = row.Scan(&goalWeight)
+	
+	if(err != nil){
+		panic(err)
+	}
 
-	return weight, goalWeight, resp.StatusCode
+	return weight, goalWeight
 }
 
 // TestWeightsUpdate tests if the users weights are updated as intended
@@ -322,70 +247,36 @@ func TestWeightsUpdate(t *testing.T) {
 	Query1 := "select bodyweight from users where username=$1"
 	Query2 := "select goalweight from users where username=$1"
 	//Test 1
-	weight1, goalWeight1, resp1 := WeightTestHelper(mockData1, Query1, Query2)
+	resp1,_ := GenericHelper(mockData1,UpdateWeights,"/update_weight")
+	weight1, goalWeight1 := WeightTestHelper(Query1, Query2)
 	assert.Equal(t, 200, resp1)
 	assert.Equal(t, 190, weight1)
 	assert.Equal(t, 245, goalWeight1)
 
 	//Test 2
-	weight2, goalWeight2, resp2 := WeightTestHelper(mockData2, Query1, Query2)
+	resp2,_ := GenericHelper(mockData2,UpdateWeights,"/update_weight")
+	weight2, goalWeight2 := WeightTestHelper(Query1, Query2)
 	assert.Equal(t, 200, resp2)
 	assert.Equal(t, 330, weight2)
 	assert.Equal(t, 220, goalWeight2)
 }
 
 // FollowTestHelper is the helper function for the follow test
-func FollowTestHelper(data []byte, f http.HandlerFunc, route string, query1 string, query2 string) ([]string, []string, int) {
-	//Signin
-	signinData := []byte(`{
-        "username":"testingaccount",
-        "password":"password"
-    }`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-	print(resp.StatusCode)
-
-	//TEST
-	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(f)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-
-	//Resp Body
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-
+func FollowTestHelper(query1 string, query2 string) ([]string, []string) {
 	//DB Queries
 	var following []string
 	row := db.QueryRow(query1)
-	err = row.Scan(pq.Array(&following))
+	err := row.Scan(pq.Array(&following))
 
 	var followers []string
 	row = db.QueryRow(query2)
 	err = row.Scan(pq.Array(&followers))
 
-	return following, followers, resp.StatusCode
+	if(err != nil){
+		panic(err)
+	}
+
+	return following, followers
 }
 
 // TestFollower tests if the follow and unfollow handlers work as intended
@@ -399,12 +290,14 @@ func TestFollower(t *testing.T) {
 	followerQuery := fmt.Sprintf("select following from users where username='%s'", "testingaccount")
 	followedQuery := fmt.Sprintf("select followers from users where username='%s'", "Shardool")
 
-	following, followers, resp1 := FollowTestHelper(mockData1, Follow, "/follow", followerQuery, followedQuery)
+	resp1,_ := GenericHelper(mockData1,Follow,"/follow")
+	following, followers := FollowTestHelper(followerQuery, followedQuery)
 	assert.Equal(t, 200, resp1)
 	assert.Contains(t, following, "Shardool")
 	assert.Contains(t, followers, "testingaccount")
 
-	following2, followers2, resp2 := FollowTestHelper(mockData1, Unfollow, "/unfollow", followerQuery, followedQuery)
+	resp2,_ := GenericHelper(mockData1,Unfollow,"/unfollow")
+	following2, followers2 := FollowTestHelper(followerQuery, followedQuery)	
 	assert.Equal(t, 200, resp2)
 	assert.NotContains(t, following2, "Shardool")
 	assert.NotContains(t, followers2, "testingaccount")
@@ -418,65 +311,30 @@ func TestFollower(t *testing.T) {
 	followerQuery = fmt.Sprintf("select following from users where username='%s'", "testingaccount")
 	followedQuery = fmt.Sprintf("select followers from users where username='%s'", "Bijon")
 
-	following, followers, resp1 = FollowTestHelper(mockData2, Follow, "/follow", followerQuery, followedQuery)
+	resp1,_ = GenericHelper(mockData2,Follow,"/follow")
+	following, followers = FollowTestHelper(followerQuery, followedQuery)
 	assert.Equal(t, 200, resp1)
 	assert.Contains(t, following, "Bijon")
 	assert.Contains(t, followers, "testingaccount")
 
-	following2, followers2, resp2 = FollowTestHelper(mockData2, Unfollow, "/unfollow", followerQuery, followedQuery)
+	resp2,_ = GenericHelper(mockData2,Unfollow,"/unfollow")
+	following2, followers2 = FollowTestHelper(followerQuery, followedQuery)		
 	assert.Equal(t, 200, resp2)
 	assert.NotContains(t, following2, "Bijon")
 	assert.NotContains(t, followers2, "testingaccount")
 }
 
 // LikesTestHelper is a helper function for the like/unlike post tests
-func LikesTestHelper(data []byte, f http.HandlerFunc, route string, query string) ([]string, int) {
-	//Signin
-	signinData := []byte(`{
-        "username":"testingaccount",
-        "password":"password"
-    }`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-	print(resp.StatusCode)
-
-	//TEST
-	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(f)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-
-	//Resp Body
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-
+func LikesTestHelper(query string) []string {
 	//DB query
 	var likes []string
 	row := db.QueryRow(query)
-	err = row.Scan(pq.Array(&likes))
+	err := row.Scan(pq.Array(&likes))
+	if(err != nil){
+		panic(err)
+	}
 
-	return likes, resp.StatusCode
+	return likes
 }
 
 // TestLikes tests liking and unliking posts
@@ -489,64 +347,33 @@ func TestLikes(t *testing.T) {
 	query := fmt.Sprintf("select likes from posts where id='%s'", "5492C1CA32B7")
 
 	//Test 1
-	likes, resp := LikesTestHelper(mockData1, LikePost, "/like_post", query)
-	assert.Equal(t, 200, resp)
+	resp1,_ := GenericHelper(mockData1, LikePost, "/like_post")
+	likes := LikesTestHelper(query)
+	assert.Equal(t, 200, resp1)
 	assert.Contains(t, likes, "testingaccount")
 
-	likes2, resp2 := LikesTestHelper(mockData1, Unlike, "/unlike_post", query)
+	resp2,_ := GenericHelper(mockData1, Unlike, "/unlike_post")
+	likes2 := LikesTestHelper(query)
 	assert.Equal(t, 200, resp2)
 	assert.NotContains(t, likes2, "testingaccount")
 }
 
 
-// FuzzyTestHelper calls the fuzzysearch handler and returns the query for the test
-func FuzzyTestHelper(data []byte, f http.HandlerFunc, route string) (int, []string) {
-	//Signin
-	signinData := []byte(`{
-		"username":"testingaccount",
-		"password":"password"
-	}`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-
-	//TEST
-	w = httptest.NewRecorder()
-	req, err = http.NewRequest("GET", baseURL+route, bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(f)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-	res := w.Body.String()
+// FuzzyTestHelper returns the query for the test
+func FuzzyTestHelper(res string) []string {
 	var usernames []string
 	var users []Profile
 
-	if err != nil {
+	
+	err := json.Unmarshal([]byte(res), &users)
+	if(err != nil){
 		panic(err)
 	}
-	err = json.Unmarshal([]byte(res), &users)
 
 	for _, entry := range users {
 		usernames = append(usernames, entry.Username)
 	}
-	return resp.StatusCode, usernames
+	return usernames
 }
 
 // TestFuzzySearch tests if the program can search for users
@@ -556,8 +383,9 @@ func TestFuzzySearch(t *testing.T) {
 		"query":"Shard"
 	}`)
 
-	resp, usernames := FuzzyTestHelper(mockData1, FuzzySearch, "/search")
-	assert.Equal(t, 200, resp)
+	resp1,res1 := GenericHelper(mockData1, FuzzySearch, "/search")
+	usernames := FuzzyTestHelper(res1)
+	assert.Equal(t, 200, resp1)
 	assert.Contains(t, usernames, "Shardool")
 	assert.Contains(t, usernames, "Shardel")
 
@@ -566,63 +394,28 @@ func TestFuzzySearch(t *testing.T) {
 		"query":"Shardool Pa"
 	}`)
 
-	resp2, usernames2 := FuzzyTestHelper(mockData2, FuzzySearch, "/search")
+	resp2,res2 := GenericHelper(mockData2, FuzzySearch, "/search")
+	usernames2 := FuzzyTestHelper(res2)
 	assert.Equal(t, 200, resp2)
 	assert.Contains(t, usernames2, "Shardool")
 	assert.NotContains(t, usernames2, "Shardel")
 }
 
 // FeedTestHelper helps with grabbing the news feed
-func FeedTestHelper(data []byte, f http.HandlerFunc, route string) ([]string, int) {
-	//Signin
-	signinData := []byte(`{
-		"username":"testingaccount",
-		"password":"password"
-	}`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-
-	//TEST
-	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(f)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-	res := w.Body.String()
-
+func FeedTestHelper(res string) ([]string) {
 	var usernames []string
 	var posts []Post
 
-	err = json.Unmarshal([]byte(res), &posts)
+	err := json.Unmarshal([]byte(res), &posts)
+	if(err != nil){
+		panic(err)
+	}
 
 	for _, entry := range posts {
 		usernames = append(usernames, entry.Username)
 	}
 
-	//Resp Body
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	return usernames, resp.StatusCode
+	return usernames
 }
 
 //TestNewsFeed checks if a feed can be grabbed for a user
@@ -639,7 +432,8 @@ func TestNewsFeed(t *testing.T) {
 		panic(err)
 	}
 
-	usernames, resp := FeedTestHelper(mockData, GetFeed, "/get_feed")
+	resp,res := GenericHelper(mockData, GetFeed, "/get_feed")
+	usernames := FeedTestHelper(res)
 	assert.Equal(t, resp, 200)
 	for _, username := range usernames {
 		assert.Contains(t, following, username)
@@ -648,52 +442,15 @@ func TestNewsFeed(t *testing.T) {
 
 
 // LiftTestHelper helps with the lift test
-func LiftTestHelper(data []byte, f http.HandlerFunc, route string, query string) (UserLifts, int) {
-	//Signin
-	signinData := []byte(`{
-		"username":"testingaccount",
-		"password":"password"
-	}`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-	print(resp.StatusCode)
-
-	//TEST
-	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(f)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-
-	//Resp Body
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-
+func LiftTestHelper(query string) (UserLifts) {
 	//DB query
 	var temp UserLifts
 	row := db.QueryRow(query)
-	err = row.Scan(&temp.Username, &temp.Lifts)
-	return temp, resp.StatusCode
+	err := row.Scan(&temp.Username, &temp.Lifts)
+	if(err != nil){
+		panic(err)
+	}
+	return temp
 }
 
 //TestLiftUpdate tests if the lift dictionary was properly updated
@@ -716,7 +473,8 @@ func TestLiftUpdate(t *testing.T) {
 		}
 	}`)
 	query := "select * from userlifts where username='testingaccount'"
-	lifts, resp := LiftTestHelper(mockData1, UpdateLifts, "/update_lifts", query)
+	resp,_ := GenericHelper(mockData1, UpdateLifts, "/update_lifts")
+	lifts := LiftTestHelper(query)
 	assert.Equal(t, 200, resp)
 	assert.Equal(t, "testingaccount", lifts.Username)
 
