@@ -17,6 +17,47 @@ import (
 
 var baseURL = "http://localhost:8000"
 
+//Helper for testing
+func GenericHelper(data []byte, f http.HandlerFunc, route string) (int,string) {
+	//Signin
+	signinData := []byte(`{
+		"username":"testingaccount",
+		"password":"password"
+	}`)
+
+	//Request
+	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	w := httptest.NewRecorder()
+	handler := http.HandlerFunc(Signin)
+	handler.ServeHTTP(w, req)
+	resp := w.Result()
+	print(resp.StatusCode)
+
+	//TEST
+	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	//Serve HTTP
+	handler = http.HandlerFunc(f)
+	handler.ServeHTTP(w, req)
+	resp = w.Result()
+	res := w.Body.String()
+
+	return resp.StatusCode,res
+}
+
+
 // TestSignin Test if signin works
 func TestSignin(t *testing.T) {
 	//Start Server
@@ -69,50 +110,6 @@ func TestSignin(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 }
 
-// CalTestHelper is the helper for the calorie test
-func CalTestHelper(data []byte) int {
-	//Signin
-	signinData := []byte(`{
-        "username":"testingaccount",
-        "password":"password"
-    }`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-	print(resp.StatusCode)
-
-	//TEST
-	req, err = http.NewRequest("POST", baseURL+"/update_calories", bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(UpdateCalories)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-
-	//Resp Body
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	//Assert
-	return resp.StatusCode
-}
 
 // TestCalUpdate tests if the calorie values are updated correctly
 func TestCalUpdate(t *testing.T) {
@@ -148,15 +145,15 @@ func TestCalUpdate(t *testing.T) {
     }`)
 
 	//Test 1
-	resp1 := CalTestHelper(calorieData1)
+	resp1,_ := GenericHelper(calorieData1,UpdateCalories,"/update_calories")
 	assert.Equal(t, 200, resp1)
 
 	//Test 2
-	resp2 := CalTestHelper(calorieData2)
+	resp2,_ := GenericHelper(calorieData2,UpdateCalories,"/update_calories")
 	assert.Equal(t, 200, resp2)
 
 	//Test 3
-	resp3 := CalTestHelper(calorieData3)
+	resp3,_ := GenericHelper(calorieData3,UpdateCalories,"/update_calories")
 	assert.Equal(t, 200, resp3)
 }
 
@@ -649,53 +646,6 @@ func TestNewsFeed(t *testing.T) {
 	}
 }
 
-//PersonalFeedHelper helps with the user profile feed testing
-func PersonalFeedHelper(data []byte, f http.HandlerFunc, route string) int {
-	//Signin
-
-	signinData := []byte(`{
-		"username":"Shardool",
-		"password":"Pathak"
-	}`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-
-	//TEST
-	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(f)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-
-	return resp.StatusCode
-}
-
-//TestPersonalFeed checks if the feed for the user is retrieved
-func TestPersonalFeed(t *testing.T) {
-	mockData := []byte(`{
-		"username":"Shardool"
-	}`)
-	resp := PersonalFeedHelper(mockData, GetPersonalFeed, "/get_personal_feed")
-	assert.Equal(t, resp, 200)
-}
 
 // LiftTestHelper helps with the lift test
 func LiftTestHelper(data []byte, f http.HandlerFunc, route string, query string) (UserLifts, int) {
@@ -789,45 +739,6 @@ func TestLiftUpdate(t *testing.T) {
 	assert.Equal(t, bERM, 260)
 }
 
-//EstimateHelper is the helper for the max calculator test
-func EstimateHelper(data []byte, f http.HandlerFunc, route string) (string, int) {
-	//Signin
-	signinData := []byte(`{
-		"username":"testingaccount",
-		"password":"password"
-	}`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-	print(resp.StatusCode)
-
-	//TEST
-	req, err = http.NewRequest("GET", baseURL+route, bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(f)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-	res := w.Body.String()
-
-	return res, resp.StatusCode
-}
 
 //TestMaxCalculator tests if a one rep max estimate is valid
 func TestMaxCalculator(t *testing.T) {
@@ -837,7 +748,7 @@ func TestMaxCalculator(t *testing.T) {
 		"rpe":7.5
 	}`)
 
-	ret, resp := EstimateHelper(mockData1, EstimateMax, "/estimate_max")
+	resp, ret := GenericHelper(mockData1, EstimateMax, "/estimate_max")
 	ERM, _ := strconv.Atoi(ret)
 	assert.Equal(t, resp, 200)
 	assert.Equal(t, ERM, 462)
@@ -848,7 +759,7 @@ func TestMaxCalculator(t *testing.T) {
 		"rpe":9.5
 	}`)
 
-	ret, resp = EstimateHelper(mockData2, EstimateMax, "/estimate_max")
+	resp, ret = GenericHelper(mockData2, EstimateMax, "/estimate_max")
 	ERM, _ = strconv.Atoi(ret)
 	assert.Equal(t, resp, 200)
 	assert.Equal(t, ERM, 241)
@@ -859,49 +770,10 @@ func TestMaxCalculator(t *testing.T) {
 		"rpe":10
 	}`)
 
-	ret, resp = EstimateHelper(mockData3, EstimateMax, "/estimate_max")
+	resp, ret = GenericHelper(mockData3, EstimateMax, "/estimate_max")
 	ERM, _ = strconv.Atoi(ret)
 	assert.Equal(t, resp, 200)
 	assert.Equal(t, ERM, 365)
-}
-
-//Helper for testing if posts are made
-func PostTestHelper(data []byte, f http.HandlerFunc, route string) int {
-	//Signin
-	signinData := []byte(`{
-		"username":"testingaccount",
-		"password":"password"
-	}`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-	print(resp.StatusCode)
-
-	//TEST
-	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(f)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-
-	return resp.StatusCode
 }
 
 //TestPost tests is a post can be made
@@ -915,7 +787,7 @@ func TestPost(t *testing.T) {
 		"likes":[]
 	}`)
 
-	resp := PostTestHelper(mockData1, MakePost, "/make_post")
+	resp,_ := GenericHelper(mockData1, MakePost, "/make_post")
 	assert.Equal(t, resp, 200)
 
 	mockData2 := []byte(`{
@@ -927,48 +799,8 @@ func TestPost(t *testing.T) {
 		"likes":[]
 	}`)
 
-	resp = PostTestHelper(mockData2, MakePost, "/make_post")
+	resp,_ = GenericHelper(mockData2, MakePost, "/make_post")
 	assert.Equal(t, resp, 200)
-}
-
-//Helper for testing if posts are made
-func LogTestHelper(data []byte, f http.HandlerFunc, route string) (int,string) {
-	//Signin
-	signinData := []byte(`{
-		"username":"testingaccount",
-		"password":"password"
-	}`)
-
-	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
-	handler.ServeHTTP(w, req)
-	resp := w.Result()
-	print(resp.StatusCode)
-
-	//TEST
-	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	//Serve HTTP
-	handler = http.HandlerFunc(f)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-	res := w.Body.String()
-
-	return resp.StatusCode,res
 }
 
 
@@ -978,7 +810,7 @@ func TestLog(t *testing.T) {
 		"username":"testingaccount"
 	}`)
 
-	statusCode,_ := LogTestHelper(mockData1, GetLiftNames, "/get_lifts")
+	statusCode,_ := GenericHelper(mockData1, GetLiftNames, "/get_lifts")
 	assert.Equal(t, statusCode, 200)
 
 	mockData2 := []byte(`{
@@ -992,6 +824,16 @@ func TestLog(t *testing.T) {
 		"pr":true
 	}`)
 
-	statusCode,_ = LogTestHelper(mockData2, LogExercise, "/logexercise")
+	statusCode,_ = GenericHelper(mockData2, LogExercise, "/logexercise")
 	assert.Equal(t, statusCode, 200)
+}
+
+
+//TestPersonalFeed checks if the feed for the user is retrieved
+func TestPersonalFeed(t *testing.T) {
+	mockData := []byte(`{
+		"username":"Shardool"
+	}`)
+	resp,_ := GenericHelper(mockData, GetPersonalFeed, "/get_personal_feed")
+	assert.Equal(t, resp, 200)
 }
