@@ -1,2 +1,2 @@
 # goApp
-Building a sociak media app for weightlifters in go
+Building a social media app for weightlifters in go
