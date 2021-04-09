@@ -16,7 +16,7 @@ import (
 var baseURL = "http://localhost:8000"
 
 //Helper for testing
-func GenericHelper(data []byte, f http.HandlerFunc, route string) (int,string) {
+func TstHelper(data []byte, f http.HandlerFunc, route string) (int,string) {
 	//Signin
 	signinData := []byte(`{
 		"username":"testingaccount",
@@ -143,15 +143,15 @@ func TestCalUpdate(t *testing.T) {
     }`)
 
 	//Test 1
-	resp1,_ := GenericHelper(calorieData1,UpdateCalories,"/update_calories")
+	resp1,_ := TstHelper(calorieData1,UpdateCalories,"/update_calories")
 	assert.Equal(t, 200, resp1)
 
 	//Test 2
-	resp2,_ := GenericHelper(calorieData2,UpdateCalories,"/update_calories")
+	resp2,_ := TstHelper(calorieData2,UpdateCalories,"/update_calories")
 	assert.Equal(t, 200, resp2)
 
 	//Test 3
-	resp3,_ := GenericHelper(calorieData3,UpdateCalories,"/update_calories")
+	resp3,_ := TstHelper(calorieData3,UpdateCalories,"/update_calories")
 	assert.Equal(t, 200, resp3)
 }
 
@@ -190,13 +190,13 @@ func TestDescUpdate(t *testing.T) {
     }`)
 
 	//Test 1
-	resp1,_ := GenericHelper(mockData1,UpdateDescription,"/update_bio")
+	resp1,_ := TstHelper(mockData1,UpdateDescription,"/update_bio")
 	desc1 := DescTestHelper()
 	assert.Equal(t, 200, resp1)
 	assert.Equal(t, "Test Bio 1", desc1)
 
 	//Test 2
-	resp2,_ := GenericHelper(mockData2,UpdateDescription,"/update_bio")
+	resp2,_ := TstHelper(mockData2,UpdateDescription,"/update_bio")
 	assert.Equal(t, 200, resp2)
 	desc2 := DescTestHelper()
 	assert.Equal(t, "Test Bio 3", desc2)
@@ -247,14 +247,14 @@ func TestWeightsUpdate(t *testing.T) {
 	Query1 := "select bodyweight from users where username=$1"
 	Query2 := "select goalweight from users where username=$1"
 	//Test 1
-	resp1,_ := GenericHelper(mockData1,UpdateWeights,"/update_weight")
+	resp1,_ := TstHelper(mockData1,UpdateWeights,"/update_weight")
 	weight1, goalWeight1 := WeightTestHelper(Query1, Query2)
 	assert.Equal(t, 200, resp1)
 	assert.Equal(t, 190, weight1)
 	assert.Equal(t, 245, goalWeight1)
 
 	//Test 2
-	resp2,_ := GenericHelper(mockData2,UpdateWeights,"/update_weight")
+	resp2,_ := TstHelper(mockData2,UpdateWeights,"/update_weight")
 	weight2, goalWeight2 := WeightTestHelper(Query1, Query2)
 	assert.Equal(t, 200, resp2)
 	assert.Equal(t, 330, weight2)
@@ -290,13 +290,13 @@ func TestFollower(t *testing.T) {
 	followerQuery := fmt.Sprintf("select following from users where username='%s'", "testingaccount")
 	followedQuery := fmt.Sprintf("select followers from users where username='%s'", "Shardool")
 
-	resp1,_ := GenericHelper(mockData1,Follow,"/follow")
+	resp1,_ := TstHelper(mockData1,Follow,"/follow")
 	following, followers := FollowTestHelper(followerQuery, followedQuery)
 	assert.Equal(t, 200, resp1)
 	assert.Contains(t, following, "Shardool")
 	assert.Contains(t, followers, "testingaccount")
 
-	resp2,_ := GenericHelper(mockData1,Unfollow,"/unfollow")
+	resp2,_ := TstHelper(mockData1,Unfollow,"/unfollow")
 	following2, followers2 := FollowTestHelper(followerQuery, followedQuery)	
 	assert.Equal(t, 200, resp2)
 	assert.NotContains(t, following2, "Shardool")
@@ -311,13 +311,13 @@ func TestFollower(t *testing.T) {
 	followerQuery = fmt.Sprintf("select following from users where username='%s'", "testingaccount")
 	followedQuery = fmt.Sprintf("select followers from users where username='%s'", "Bijon")
 
-	resp1,_ = GenericHelper(mockData2,Follow,"/follow")
+	resp1,_ = TstHelper(mockData2,Follow,"/follow")
 	following, followers = FollowTestHelper(followerQuery, followedQuery)
 	assert.Equal(t, 200, resp1)
 	assert.Contains(t, following, "Bijon")
 	assert.Contains(t, followers, "testingaccount")
 
-	resp2,_ = GenericHelper(mockData2,Unfollow,"/unfollow")
+	resp2,_ = TstHelper(mockData2,Unfollow,"/unfollow")
 	following2, followers2 = FollowTestHelper(followerQuery, followedQuery)		
 	assert.Equal(t, 200, resp2)
 	assert.NotContains(t, following2, "Bijon")
@@ -347,12 +347,12 @@ func TestLikes(t *testing.T) {
 	query := fmt.Sprintf("select likes from posts where id='%s'", "5492C1CA32B7")
 
 	//Test 1
-	resp1,_ := GenericHelper(mockData1, LikePost, "/like_post")
+	resp1,_ := TstHelper(mockData1, LikePost, "/like_post")
 	likes := LikesTestHelper(query)
 	assert.Equal(t, 200, resp1)
 	assert.Contains(t, likes, "testingaccount")
 
-	resp2,_ := GenericHelper(mockData1, Unlike, "/unlike_post")
+	resp2,_ := TstHelper(mockData1, Unlike, "/unlike_post")
 	likes2 := LikesTestHelper(query)
 	assert.Equal(t, 200, resp2)
 	assert.NotContains(t, likes2, "testingaccount")
@@ -383,7 +383,7 @@ func TestFuzzySearch(t *testing.T) {
 		"query":"Shard"
 	}`)
 
-	resp1,res1 := GenericHelper(mockData1, FuzzySearch, "/search")
+	resp1,res1 := TstHelper(mockData1, FuzzySearch, "/search")
 	usernames := FuzzyTestHelper(res1)
 	assert.Equal(t, 200, resp1)
 	assert.Contains(t, usernames, "Shardool")
@@ -394,7 +394,7 @@ func TestFuzzySearch(t *testing.T) {
 		"query":"Shardool Pa"
 	}`)
 
-	resp2,res2 := GenericHelper(mockData2, FuzzySearch, "/search")
+	resp2,res2 := TstHelper(mockData2, FuzzySearch, "/search")
 	usernames2 := FuzzyTestHelper(res2)
 	assert.Equal(t, 200, resp2)
 	assert.Contains(t, usernames2, "Shardool")
@@ -432,7 +432,7 @@ func TestNewsFeed(t *testing.T) {
 		panic(err)
 	}
 
-	resp,res := GenericHelper(mockData, GetFeed, "/get_feed")
+	resp,res := TstHelper(mockData, GetFeed, "/get_feed")
 	usernames := FeedTestHelper(res)
 	assert.Equal(t, resp, 200)
 	for _, username := range usernames {
@@ -473,7 +473,7 @@ func TestLiftUpdate(t *testing.T) {
 		}
 	}`)
 	query := "select * from userlifts where username='testingaccount'"
-	resp,_ := GenericHelper(mockData1, UpdateLifts, "/update_lifts")
+	resp,_ := TstHelper(mockData1, UpdateLifts, "/update_lifts")
 	lifts := LiftTestHelper(query)
 	assert.Equal(t, 200, resp)
 	assert.Equal(t, "testingaccount", lifts.Username)
@@ -506,7 +506,7 @@ func TestMaxCalculator(t *testing.T) {
 		"rpe":7.5
 	}`)
 
-	resp, ret := GenericHelper(mockData1, EstimateMax, "/estimate_max")
+	resp, ret := TstHelper(mockData1, EstimateMax, "/estimate_max")
 	ERM, _ := strconv.Atoi(ret)
 	assert.Equal(t, resp, 200)
 	assert.Equal(t, ERM, 462)
@@ -517,7 +517,7 @@ func TestMaxCalculator(t *testing.T) {
 		"rpe":9.5
 	}`)
 
-	resp, ret = GenericHelper(mockData2, EstimateMax, "/estimate_max")
+	resp, ret = TstHelper(mockData2, EstimateMax, "/estimate_max")
 	ERM, _ = strconv.Atoi(ret)
 	assert.Equal(t, resp, 200)
 	assert.Equal(t, ERM, 241)
@@ -528,7 +528,7 @@ func TestMaxCalculator(t *testing.T) {
 		"rpe":10
 	}`)
 
-	resp, ret = GenericHelper(mockData3, EstimateMax, "/estimate_max")
+	resp, ret = TstHelper(mockData3, EstimateMax, "/estimate_max")
 	ERM, _ = strconv.Atoi(ret)
 	assert.Equal(t, resp, 200)
 	assert.Equal(t, ERM, 365)
@@ -545,7 +545,7 @@ func TestPost(t *testing.T) {
 		"likes":[]
 	}`)
 
-	resp,_ := GenericHelper(mockData1, MakePost, "/make_post")
+	resp,_ := TstHelper(mockData1, MakePost, "/make_post")
 	assert.Equal(t, resp, 200)
 
 	mockData2 := []byte(`{
@@ -557,7 +557,7 @@ func TestPost(t *testing.T) {
 		"likes":[]
 	}`)
 
-	resp,_ = GenericHelper(mockData2, MakePost, "/make_post")
+	resp,_ = TstHelper(mockData2, MakePost, "/make_post")
 	assert.Equal(t, resp, 200)
 }
 
@@ -568,7 +568,7 @@ func TestLog(t *testing.T) {
 		"username":"testingaccount"
 	}`)
 
-	statusCode,_ := GenericHelper(mockData1, GetLiftNames, "/get_lifts")
+	statusCode,_ := TstHelper(mockData1, GetLiftNames, "/get_lifts")
 	assert.Equal(t, statusCode, 200)
 
 	mockData2 := []byte(`{
@@ -582,7 +582,7 @@ func TestLog(t *testing.T) {
 		"pr":true
 	}`)
 
-	statusCode,_ = GenericHelper(mockData2, LogExercise, "/logexercise")
+	statusCode,_ = TstHelper(mockData2, LogExercise, "/logexercise")
 	assert.Equal(t, statusCode, 200)
 }
 
@@ -592,6 +592,6 @@ func TestPersonalFeed(t *testing.T) {
 	mockData := []byte(`{
 		"username":"Shardool"
 	}`)
-	resp,_ := GenericHelper(mockData, GetPersonalFeed, "/get_personal_feed")
+	resp,_ := TstHelper(mockData, GetPersonalFeed, "/get_personal_feed")
 	assert.Equal(t, resp, 200)
 }
