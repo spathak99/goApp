@@ -1,2 +1,2 @@
 # goApp
-Building an app for weightlifters in go and react native
+Building a social media app for weightlifters in go
