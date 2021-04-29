@@ -11,8 +11,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+//Server
 const hashCost = 8
-
 var db *sql.DB
 var server *http.Server
 
@@ -61,21 +61,26 @@ func startServer() {
 	mux.HandleFunc("/logexercise", LogExercise)
 	mux.HandleFunc("/get_lifts",GetLiftNames)
 	mux.HandleFunc("/grablog", GrabLog)
+	
+	//Launch
 	initDB()
 	handler := cors.Default().Handler(mux)
 	http.ListenAndServe(":8000", handler)
 }
 
+//End
 func stopServer() {
 	server.Close()
 }
 
+//Allow cross origin sharing
 func setupCORS(w *http.ResponseWriter, req *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }
 
+//Initialize DB
 func initDB() {
 	var err error
 	db, err = sql.Open("postgres", "dbname=mydb sslmode=disable")

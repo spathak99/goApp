@@ -15,6 +15,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+//Cookie for authentication
 var (
 	cookie = securecookie.GenerateRandomKey(32)
 	store  = sessions.NewCookieStore(cookie)
