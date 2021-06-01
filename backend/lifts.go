@@ -85,10 +85,7 @@ func UpdateLifts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Write Response
-	ret := []byte(`{
-		"response":"Succesfully updated program"
-	}`)
-	w.Write(ret)
+	w.Write([]byte(`{"response":"Succesfully updated program"}`))
 }
 
 //GetUserMax gets the max of the user
@@ -118,8 +115,8 @@ func GetUserMax(w http.ResponseWriter, r *http.Request) {
 	row := db.QueryRow("select lifts from userlifts where username=$1", username)
 	err = row.Scan(&lifts)
 
-	ret := []byte(lifts)
-	w.Write(ret)
+	//Write
+	w.Write([]byte(lifts))
 }
 
 //EstimateMax calculates the estimated one rep max
@@ -250,6 +247,7 @@ func GetLiftNames(w http.ResponseWriter, r *http.Request){
 		temp = append(temp,helper.Name)
 	}
 
+	//Reponse
 	var result = Unique(temp)
 	response, err := json.Marshal(result)
 	w.Write([]byte(fmt.Sprintf(`{"lifts": %s }`, response)))

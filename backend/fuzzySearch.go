@@ -47,6 +47,8 @@ func FuzzySearch(w http.ResponseWriter, r *http.Request) {
 		}
 		users = append(users, user)
 	}
+
+	//Response
 	w.Header().Set("Content-Type", "application/json")
 	ret, err := json.Marshal(users)
 	w.Write(ret)

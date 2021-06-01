@@ -22,6 +22,15 @@ var (
 	name   = "cookie-name"
 )
 
+// Reverse
+func reverse(posts []Post) []Post {
+	newList := make([]Post, len(posts))
+	for i, j := 0, len(posts)-1; i <= j; i, j = i+1, j-1 {
+		newList[i], newList[j] = posts[j], posts[i]
+	}
+	return newList
+}
+
 //GetUsers gets all users except the current user
 func getUsers(w http.ResponseWriter, r *http.Request) {
 	//Authentication
@@ -310,25 +319,23 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//updates calories left
-	query2 := fmt.Sprintf("UPDATE users SET caloriesleft = '%f' WHERE username = '%s';", creds.CaloriesLeft, creds.Username)
-	if _, err = db.Query(query2); err != nil {
+	query := fmt.Sprintf("UPDATE users SET caloriesleft = '%f' WHERE username = '%s';", creds.CaloriesLeft, creds.Username)
+	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	//updates calorie goal
-	query3 := fmt.Sprintf("UPDATE users SET caloriegoal = '%f' WHERE username = '%s';", creds.CalorieGoal, creds.Username)
-	if _, err = db.Query(query3); err != nil {
+	query = fmt.Sprintf("UPDATE users SET caloriegoal = '%f' WHERE username = '%s';", creds.CalorieGoal, creds.Username)
+	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	rp := []byte(`{
-		"response":"Succesfully updated calories"
-	}`)
-	w.Write(rp)
+	//Response
+	w.Write([]byte(`{"response":"Succesfully updated calories"}`))
 	return
 }
 
@@ -362,8 +369,8 @@ func UpdateWeights(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Update Goalweight
-	query2 := fmt.Sprintf("UPDATE users SET goalweight = '%f' WHERE username = '%s';", creds.GoalWeight, creds.Username)
-	if _, err = db.Query(query2); err != nil {
+	query = fmt.Sprintf("UPDATE users SET goalweight = '%f' WHERE username = '%s';", creds.GoalWeight, creds.Username)
+	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -389,10 +396,10 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
 	//Logs new user
-	query := "insert into users values ($1, $2,$3,$4,$5,$6,$7,$8,$9,$10,$11)"
+	query := "insert into users values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)"
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), 8)
 
 	if _, err = db.Query(query,
 		creds.Username,
@@ -494,9 +501,8 @@ func GetUserData(w http.ResponseWriter, r *http.Request) {
 		pq.Array(&user.Followers), pq.Array(&user.Following),
 		&user.Program, &user.Name)
 
-	w.Header().Set("Content-Type", "application/json")
-
 	//Write Response
+	w.Header().Set("Content-Type", "application/json")
 	ret, err := json.Marshal(user)
 	w.Write(ret)
 }
@@ -543,15 +549,6 @@ func MakePost(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-}
-
-// Reverse
-func reverse(posts []Post) []Post {
-	newList := make([]Post, len(posts))
-	for i, j := 0, len(posts)-1; i <= j; i, j = i+1, j-1 {
-		newList[i], newList[j] = posts[j], posts[i]
-	}
-	return newList
 }
 
 // LikePost adds a username to the list of likes on a given post
