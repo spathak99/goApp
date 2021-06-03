@@ -310,16 +310,13 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 	var currCals int
 	row := db.QueryRow("select caloriesleft from users where username=$1", creds.Username)
 	err = row.Scan(&currCals)
+	calsLeft := creds.CaloriesLeft
 	if (int(creds.CaloriesLeft)) < 0 {
-		rp := []byte(`{
-			"response":"Cannot have negative calorie goals"
-		}`)
-		w.Write(rp)
-		return
+		calsLeft = 0
 	}
 
 	//updates calories left
-	query := fmt.Sprintf("UPDATE users SET caloriesleft = '%f' WHERE username = '%s';", creds.CaloriesLeft, creds.Username)
+	query := fmt.Sprintf("UPDATE users SET caloriesleft = '%f' WHERE username = '%s';",calsLeft, creds.Username)
 	if _, err = db.Query(query); err != nil {
 		print(err)
 		w.WriteHeader(http.StatusInternalServerError)
