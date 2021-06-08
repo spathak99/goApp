@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/lib/pq"

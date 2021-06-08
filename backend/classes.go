@@ -1,6 +1,9 @@
 package main
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 // Profile is the user struct
 type Profile struct {
@@ -39,6 +42,11 @@ type UserLiftsHelper struct {
 	Lifts    json.RawMessage
 }
 
+//Handler Function Wrapper
+type BackendHandler struct {
+	Func http.HandlerFunc	
+	Test bool	
+}
 // Lift is struct used for logging trends and calculating maxes
 type Lift struct {
 	Username string
@@ -87,3 +95,4 @@ type SearchInfo struct {
 	Username string
 	Query    string
 }
+
