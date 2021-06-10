@@ -7,42 +7,18 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"github.com/gorilla/securecookie"
-	"github.com/gorilla/sessions"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
-//Cookie for authentication
-var (
-	cookie = securecookie.GenerateRandomKey(32)
-	store  = sessions.NewCookieStore(cookie)
-	name   = "cookie-name"
-)
 
-// Reverse
-func reverse(posts []Post) []Post {
-	newList := make([]Post, len(posts))
-	for i, j := 0, len(posts)-1; i <= j; i, j = i+1, j-1 {
-		newList[i], newList[j] = posts[j], posts[i]
-	}
-	return newList
-}
 
 //GetUsers gets all users except the current user
 func getUsers(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
-
+	authenticate(w,r)
+	
 	//Decode Creds
 	creds := map[string]interface{}{}
 	err := json.NewDecoder(r.Body).Decode(&creds)
@@ -74,15 +50,7 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 //GetFollowing gets a list of the people the user follows
 func GetFollowing(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Decode Creds
 	creds := map[string]interface{}{}
@@ -105,15 +73,7 @@ func GetFollowing(w http.ResponseWriter, r *http.Request) {
 //GetFollowers gets a list of your followers
 func GetFollowers(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Decode Creds
 	creds := map[string]interface{}{}
@@ -137,15 +97,8 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 func Follow(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
+
 
 	//Decode Creds
 	creds := &FollowRelation{}
@@ -187,15 +140,7 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 func Unfollow(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Decode Creds
 	creds := &FollowRelation{}
@@ -225,15 +170,7 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 // UpdateName lets the user change their actual name that is displayed on the posts
 func UpdateName(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Decode Creds
 	creds := &Profile{}
@@ -255,16 +192,7 @@ func UpdateName(w http.ResponseWriter, r *http.Request) {
 // UpdateDescription updates the bio of the given user in their db entry
 func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 
-	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Decode Creds
 	creds := &Profile{}
@@ -287,15 +215,7 @@ func UpdateDescription(w http.ResponseWriter, r *http.Request) {
 func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Decode Creds
 	creds := &Profile{}
@@ -339,15 +259,7 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 func UpdateWeights(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Decode Creds
 	creds := &Profile{}
@@ -469,16 +381,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 func GetUserData(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
-
+	authenticate(w,r)
 	//Decode Creds
 	creds := map[string]interface{}{}
 	err := json.NewDecoder(r.Body).Decode(&creds)
@@ -507,15 +410,7 @@ func GetUserData(w http.ResponseWriter, r *http.Request) {
 func MakePost(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Credentials
 	creds := &Post{}
@@ -551,15 +446,7 @@ func MakePost(w http.ResponseWriter, r *http.Request) {
 func LikePost(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Creds
 	creds := &Like{}
@@ -594,15 +481,7 @@ func LikePost(w http.ResponseWriter, r *http.Request) {
 func Unlike(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Creds
 	creds := &Like{}
@@ -643,15 +522,7 @@ func Unlike(w http.ResponseWriter, r *http.Request) {
 func GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Decode Creds
 	creds := map[string]interface{}{}
@@ -697,15 +568,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 // GetPersonalFeed grabs posts that the user made
 func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Decode Creds
 	creds := map[string]interface{}{}
@@ -744,15 +607,7 @@ func GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
 // GetPost grabs an individual post by ID
 func GetPost(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Decode Creds
 	creds := map[string]interface{}{}
