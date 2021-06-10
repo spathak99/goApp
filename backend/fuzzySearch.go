@@ -10,15 +10,7 @@ import (
 // FuzzySearch does a fuzzy search of the name of the user
 func FuzzySearch(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Creds
 	creds := &SearchInfo{}

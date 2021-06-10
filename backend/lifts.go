@@ -14,15 +14,7 @@ import (
 // InitializeLifts initializes the first set of lifts entered by the user
 func InitializeLifts(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Credentials
 	creds := &UserLiftsHelper{}
@@ -52,15 +44,7 @@ func InitializeLifts(w http.ResponseWriter, r *http.Request) {
 // UpdateLifts updates the max lifts of the user
 func UpdateLifts(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Credentials
 	creds := &UserLiftsHelper{}
@@ -91,15 +75,7 @@ func UpdateLifts(w http.ResponseWriter, r *http.Request) {
 //GetUserMax gets the max of the user
 func GetUserMax(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Credentials
 	creds := map[string]interface{}{}
@@ -122,15 +98,7 @@ func GetUserMax(w http.ResponseWriter, r *http.Request) {
 //EstimateMax calculates the estimated one rep max
 func EstimateMax(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Credentials
 	creds := &Lift{}
@@ -152,15 +120,7 @@ func EstimateMax(w http.ResponseWriter, r *http.Request) {
 //LogExercise logs a lift for the user
 func LogExercise(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Credentials
 	creds := &Lift{}
@@ -212,15 +172,7 @@ func Unique(slice []string) []string {
 //GetLiftNames gets all the types of lifts that have been logged
 func GetLiftNames(w http.ResponseWriter, r *http.Request){
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Credentials
 	creds := map[string]interface{}{}
@@ -256,15 +208,7 @@ func GetLiftNames(w http.ResponseWriter, r *http.Request){
 //GrabLog gets the logged exercises by lift
 func GrabLog(w http.ResponseWriter, r *http.Request) {
 	//Authentication
-	session, _ := store.Get(r, name)
-	auth, _ := session.Values["authenticated"].(bool)
-	if !auth {
-		if _, ok := session.Values["authenticated"]; ok {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-	}
+	authenticate(w,r)
 
 	//Credentials
 	creds := &Lift{}
