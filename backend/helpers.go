@@ -26,6 +26,20 @@ func reverse(posts []Post) []Post {
 }
 
 
+//Unique returns unique array
+func Unique(slice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, entry := range slice {
+	    if _, value := keys[entry]; !value {
+		keys[entry] = true
+		list = append(list, entry)
+	    }
+	}    
+	return list
+    }
+    
+   
 //Authenticate 
 func authenticate(w http.ResponseWriter,r *http.Request){
 	session, _ := store.Get(r, name)

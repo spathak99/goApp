@@ -156,19 +156,6 @@ func LogExercise(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Unique returns unique array
-func Unique(slice []string) []string {
-    keys := make(map[string]bool)
-    list := []string{}
-    for _, entry := range slice {
-        if _, value := keys[entry]; !value {
-            keys[entry] = true
-            list = append(list, entry)
-        }
-    }    
-    return list
-}
-
 //GetLiftNames gets all the types of lifts that have been logged
 func GetLiftNames(w http.ResponseWriter, r *http.Request){
 	//Authentication
