@@ -51,7 +51,6 @@ func UpdateCustomProgram(w http.ResponseWriter, r *http.Request) {
 
 	//DB Query 1
 	input := string(creds.ProgramList)
-	print(input)
 	query := fmt.Sprintf("UPDATE customprograms SET programlist= '%s' WHERE username = '%s';", input, creds.Username)
 	if _, err = db.Query(query); err != nil {
 		fmt.Printf("%s", err)

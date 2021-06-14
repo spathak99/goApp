@@ -112,8 +112,8 @@ func EstimateMax(w http.ResponseWriter, r *http.Request) {
 	//Calculation and response
 	reps := float64(creds.Reps)
 	weight := float64(creds.Weight)
-	ERM := int((weight) / (1.0278 - 0.0278*((10.0-creds.RPE)+reps)))
-	ret := strconv.Itoa(ERM)
+	repMax := int((weight) / (1.0278 - 0.0278*((10.0-creds.RPE)+reps)))
+	ret := strconv.Itoa(repMax)
 	w.Write([]byte(ret))
 }
 
@@ -130,7 +130,7 @@ func LogExercise(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	inp, _ := json.Marshal(creds)
+	input, _ := json.Marshal(creds)
 	var currLifts []string
 	row := db.QueryRow("select lifts from exerciselog where username=$1", creds.Username)
 	err = row.Scan(pq.Array(&currLifts))
@@ -138,7 +138,7 @@ func LogExercise(w http.ResponseWriter, r *http.Request) {
 	//Query
 	if len(currLifts) == 0 {
 		var inputarr [1]string
-		inputarr[0] = string(inp)
+		inputarr[0] = string(input)
 		query := "insert into exerciselog values ($1,$2)"
 		if _, err = db.Query(query,
 			creds.Username,
@@ -147,7 +147,7 @@ func LogExercise(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		query := fmt.Sprintf("UPDATE exerciselog SET lifts = lifts || '%s'::text WHERE username = '%s'", string(inp), creds.Username)
+		query := fmt.Sprintf("UPDATE exerciselog SET lifts = lifts || '%s'::text WHERE username = '%s'", string(input), creds.Username)
 		if _, err = db.Query(query); err != nil {
 			print(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -187,8 +187,8 @@ func GetLiftNames(w http.ResponseWriter, r *http.Request){
 	}
 
 	//Reponse
-	var result = Unique(temp)
-	response, err := json.Marshal(result)
+	var liftNames = Unique(temp)
+	response, err := json.Marshal(liftNames)
 	w.Write([]byte(fmt.Sprintf(`{"lifts": %s }`, response)))
 }
 

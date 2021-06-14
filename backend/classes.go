@@ -46,6 +46,7 @@ type UserLiftsHelper struct {
 type BackendHandler struct {
 	Func http.HandlerFunc	
 	Test bool	
+	
 }
 // Lift is struct used for logging trends and calculating maxes
 type Lift struct {

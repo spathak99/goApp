@@ -15,7 +15,7 @@ import (
 
 
 //GetUsers gets all users except the current user
-func getUsers(w http.ResponseWriter, r *http.Request) {
+func GetUsers(w http.ResponseWriter, r *http.Request) {
 	//Authentication
 	authenticate(w,r)
 	
@@ -421,12 +421,12 @@ func MakePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Generate Random ID
-	n := 6
-	b := make([]byte, n)
-	if _, err := rand.Read(b); err != nil {
+	len := 6
+	id := make([]byte, len)
+	if _, err := rand.Read(id); err != nil {
 		panic(err)
 	}
-	uniqueID := fmt.Sprintf("%X", b)
+	uniqueID := fmt.Sprintf("%X", id)
 
 	//Query
 	query := "insert into posts values ($1,$2,$3,$4,$5,$6)"
@@ -540,8 +540,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	//Gets all posts for news feed
 	var postList []Post
-	fllwng := strings.Join(following, "','")
-	sqlRaw := fmt.Sprintf(`select * from posts where username in ('%s')`, fllwng)
+	sqlRaw := fmt.Sprintf(`select * from posts where username in ('%s')`, strings.Join(following, "','"))
 	rows, err := db.Query(sqlRaw)
 	if err != nil {
 		panic(err)

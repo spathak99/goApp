@@ -29,14 +29,14 @@ func reverse(posts []Post) []Post {
 //Unique returns unique array
 func Unique(slice []string) []string {
 	keys := make(map[string]bool)
-	list := []string{}
+	newList := []string{}
 	for _, entry := range slice {
 	    if _, value := keys[entry]; !value {
 		keys[entry] = true
-		list = append(list, entry)
+		newList = append(newList, entry)
 	    }
 	}    
-	return list
+	return newList
     }
     
    

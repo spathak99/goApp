@@ -10,25 +10,26 @@ import (
 type PropertyMap map[string]interface{}
 
 // Value unmarshals the json data
-func (p PropertyMap) Value() (driver.Value, error) {
-	j, err := json.Marshal(p)
-	return j, err
+func (pMap PropertyMap) Value() (driver.Value, error) {
+	unmarshalledJson, err := json.Marshal(pMap)
+	return unmarshalledJson,err
+
 }
 
 // Scan takes the raw data from the DB and transforms it into the desired type
-func (p *PropertyMap) Scan(src interface{}) error {
+func (pMap *PropertyMap) Scan(src interface{}) error {
 	source, ok := src.([]byte)
 	if !ok {
 		return errors.New("type assertion .([]byte) failed")
 	}
 
-	var i interface{}
-	err := json.Unmarshal(source, &i)
+	var intFace interface{}
+	err := json.Unmarshal(source, &intFace)
 	if err != nil {
 		return err
 	}
 
-	*p, ok = i.(map[string]interface{})
+	*pMap, ok = intFace.(map[string]interface{})
 	if !ok {
 		return errors.New("type assertion .(map[string]interface{}) failed")
 	}
