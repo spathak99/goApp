@@ -73,32 +73,20 @@ func TestSignin(t *testing.T) {
 func TestCalUpdate(t *testing.T) {
 	//Testing Data
 	calorieData1 := []byte(`{
-        "username":"testingaccount",
-        "password":"password",
-        "description":"enjoy workoiut",
-        "goalweight": 200,
-        "bodyweight": 188,
+	"username":"testingaccount",
         "caloriegoal": 4000,
         "caloriesleft": 10
     }`)
 
 	calorieData2 := []byte(`{
-        "username":"testingaccount",
-        "password":"password",
-        "description":"enjoy workoiut",
-        "goalweight": 200,
-        "bodyweight": 188,
+	"username":"testingaccount",
         "caloriegoal": 4000,
         "caloriesleft": 4000
     }`)
 
 	calorieData3 := []byte(`{
-        "username":"testingaccount",
-        "password":"password",
-        "description":"enjoy workoiut",
-        "goalweight": 200,
-        "bodyweight": 188,
-        "caloriegoal": 4000,
+	"username":"testingaccount",
+	"caloriegoal": 4000,
         "caloriesleft": -29
     }`)
 
@@ -131,22 +119,12 @@ func DescTestHelper() string {
 func TestDescUpdate(t *testing.T) {
 	mockData1 := []byte(`{
         "username":"testingaccount",
-        "password":"password",
-        "description":"Test Bio 1",
-        "goalweight": 200,
-        "bodyweight": 188,
-        "caloriegoal": 4000,
-        "caloriesleft": 10
+        "description":"Test Bio 1"
     }`)
 
 	mockData2 := []byte(`{
         "username":"testingaccount",
-        "password":"password",
-        "description":"Test Bio 3",
-        "goalweight": 200,
-        "bodyweight": 188,
-        "caloriegoal": 4000,
-        "caloriesleft": 10
+        "description":"Test Bio 3"
     }`)
 
 	//Test 1
@@ -185,23 +163,15 @@ func TestWeightsUpdate(t *testing.T) {
 	//Test 1
 	mockData1 := []byte(`{
         "username":"testingaccount",
-        "password":"password",
-        "description":"Test Bio 1",
         "goalweight": 245,
-        "bodyweight": 190,
-        "caloriegoal": 4000,
-        "caloriesleft": 10
+        "bodyweight": 190
     }`)
 
 	//Test 2
 	mockData2 := []byte(`{
         "username":"testingaccount",
-        "password":"password",
-        "description":"Test Bio 2",
         "goalweight": 220,
-        "bodyweight": 330,
-        "caloriegoal": 4000,
-        "caloriesleft": 10
+        "bodyweight": 330
     }`)
 
 	Query1 := "select bodyweight from users where username=$1"

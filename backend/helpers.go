@@ -12,37 +12,37 @@ import (
 var (
 	cookie = securecookie.GenerateRandomKey(32)
 	store  = sessions.NewCookieStore(cookie)
-	name   = "cookie-name"
+	cookieName   = "cookie-name"
 )
 
 
 // Reverse a list
-func reverse(posts []Post) []Post {
-	newList := make([]Post, len(posts))
-	for i, j := 0, len(posts)-1; i <= j; i, j = i+1, j-1 {
-		newList[i], newList[j] = posts[j], posts[i]
+func reverse(source []Post) []Post {
+	destination := make([]Post, len(source))
+	for i, j := 0, len(source)-1; i <= j; i, j = i+1, j-1 {
+		destination[i], destination[j] = source[j], source[i]
 	}
-	return newList
+	return destination
 }
 
 
 //Unique returns unique array
-func Unique(slice []string) []string {
+func Unique(source []string) []string {
 	keys := make(map[string]bool)
-	newList := []string{}
-	for _, entry := range slice {
+	destination := []string{}
+	for _, entry := range source {
 	    if _, value := keys[entry]; !value {
 		keys[entry] = true
-		newList = append(newList, entry)
+		destination = append(destination, entry)
 	    }
 	}    
-	return newList
+	return destination
     }
     
    
-//Authenticate 
+//Check if user is authenticated
 func authenticate(w http.ResponseWriter,r *http.Request){
-	session, _ := store.Get(r, name)
+	session, _ := store.Get(r, cookieName)
 	auth, _ := session.Values["authenticated"].(bool)
 	if !auth {
 		if _, ok := session.Values["authenticated"]; ok {

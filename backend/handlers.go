@@ -224,7 +224,7 @@ func UpdateCalories(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
+	
 	//Updates Calories left
 	var currCals int
 	row := db.QueryRow("select caloriesleft from users where username=$1", creds.Username)
@@ -329,7 +329,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 // Signin signs in the user and authenticates them
 func Signin(w http.ResponseWriter, r *http.Request) {
 	//Start Session
-	session, _ := store.Get(r, name)
+	session, _ := store.Get(r, cookieName)
 
 	//User authentication below
 	creds := &Profile{}
