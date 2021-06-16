@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"bytes"
 	"encoding/json"
@@ -12,10 +13,8 @@ import (
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
-
 var baseURL = "http://localhost:8000"
-
-
+ 
 // TestSignin Test if signin works
 func TestSignin(t *testing.T) {
 	//Start Server
@@ -68,9 +67,9 @@ func TestSignin(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 }
 
-
-// TestCalUpdate tests if the calorie values are updated correctly
+//TestCalUpdate tests if the calories are properly updated
 func TestCalUpdate(t *testing.T) {
+
 	//Testing Data
 	calorieData1 := []byte(`{
 	"username":"testingaccount",
@@ -102,6 +101,9 @@ func TestCalUpdate(t *testing.T) {
 	resp3,_ := TstHelper(calorieData3,UpdateCalories,"/update_calories")
 	assert.Equal(t, 200, resp3)
 }
+
+
+
 
 // DescTestHelper is a helper for the description update test
 func DescTestHelper() string {
@@ -525,3 +527,4 @@ func TestPersonalFeed(t *testing.T) {
 	resp,_ := TstHelper(mockData, GetPersonalFeed, "/get_personal_feed")
 	assert.Equal(t, resp, 200)
 }
+
