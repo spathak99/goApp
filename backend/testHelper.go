@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"goApp/backend/signinHandlers"
 )
 
 
@@ -28,7 +29,7 @@ func TstHelper(data []byte, f http.HandlerFunc, route string) (int,string) {
 
 	//Serve HTTP
 	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(Signin)
+	handler := http.HandlerFunc(signinHandlers.Signin)
 	handler.ServeHTTP(w, req)
 	resp := w.Result()
 	print(resp.StatusCode)
