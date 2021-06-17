@@ -12,7 +12,7 @@ var Cookie = securecookie.GenerateRandomKey(32)
 var Store  = sessions.NewCookieStore(Cookie)
 var CookieName   = "cookie-name"
 
-//Check if user is authenticated
+//Authenticate checks if user is authenticated
 func Authenticate(w http.ResponseWriter,r *http.Request){
 	session, _ := Store.Get(r, CookieName)
 	auth, _ := session.Values["authenticated"].(bool)
