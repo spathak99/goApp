@@ -19,8 +19,8 @@ func DescTestHelper() string {
 	return desc
 }
 
-// TestDescUpdate tests if the user bio update works as intended
-func TestDescUpdate(t *testing.T) {
+//DescTest tests if the user bio update works as intended
+func DescTest(t *testing.T) {
 	mockData1 := []byte(`{
         "username":"testingaccount",
         "description":"Test Bio 1"

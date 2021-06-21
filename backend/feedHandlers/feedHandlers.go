@@ -39,6 +39,8 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+
+	//Read in posts from DB
 	defer rows.Close()
 	for rows.Next() {
 		var currPost types.Post

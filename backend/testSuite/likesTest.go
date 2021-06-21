@@ -22,8 +22,8 @@ func LikesTestHelper(query string) []string {
 	return likes
 }
 
-// TestLikes tests liking and unliking posts
-func TestLikes(t *testing.T) {
+// LikesTest tests liking and unliking posts
+func LikesTest(t *testing.T) {
 	mockData1 := []byte(`{
         "username":"testingaccount",
         "id":"5492C1CA32B7"

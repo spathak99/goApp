@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//TestPost tests is a post can be made
-func TestPost(t *testing.T) {
+//PostTest tests is a post can be made
+func PostTest(t *testing.T) {
 	mockData1 := []byte(`{
 		"id":"none",
 		"username":"testingaccount",

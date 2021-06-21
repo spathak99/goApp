@@ -4,6 +4,7 @@ package testSuite
 import (
 	"bytes"
 	"net/http"
+	"fmt"
 	"net/http/httptest"
 	"goApp/backend/signinHandlers"
 )
@@ -32,8 +33,7 @@ func TstHelper(data []byte, f http.HandlerFunc, route string) (int,string) {
 	handler := http.HandlerFunc(signinHandlers.Signin)
 	handler.ServeHTTP(w, req)
 	resp := w.Result()
-	print(resp.StatusCode)
-
+	fmt.Printf("%s - %d\n",route,resp.StatusCode)
 	//TEST
 	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
 	if err != nil {

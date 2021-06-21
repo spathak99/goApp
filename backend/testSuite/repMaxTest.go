@@ -10,8 +10,8 @@ import (
 
 
 
-//TestMaxCalculator tests if a one rep max estimate is valid
-func TestMaxCalculator(t *testing.T) {
+//CalculateMaxTest tests if a one rep max estimate is valid
+func CalculateMaxTest(t *testing.T) {
 	mockData1 := []byte(`{
 		"weight": 405,
 		"reps": 3,

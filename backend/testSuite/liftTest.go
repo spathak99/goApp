@@ -23,8 +23,8 @@ func LiftTestHelper(query string) (types.UserLifts) {
 	return temp
 }
 
-//TestLiftUpdate tests if the lift dictionary was properly updated
-func TestLiftUpdate(t *testing.T) {
+//UpdateLiftsTest tests if the lift dictionary was properly updated
+func UpdateLiftsTest(t *testing.T) {
 	mockData1 := []byte(`{
 		"username":"testingaccount",
 		"lifts": {

@@ -28,8 +28,8 @@ func FeedTestHelper(res string) ([]string) {
 	return usernames
 }
 
-//TestNewsFeed checks if a feed can be grabbed for a user
-func TestNewsFeed(t *testing.T) {
+//NewsFeedTest checks if a feed can be grabbed for a user
+func NewsFeedTest(t *testing.T) {
 	mockData := []byte(`{
 		"username":"testingaccount"
 	}`)
@@ -51,8 +51,8 @@ func TestNewsFeed(t *testing.T) {
 }
 
 
-//TestPersonalFeed checks if the feed for the user is retrieved
-func TestPersonalFeed(t *testing.T) {
+//PersonalFeedTest checks if the feed for the user is retrieved
+func PersonalFeedTest(t *testing.T) {
 	mockData := []byte(`{
 		"username":"Shardool"
 	}`)

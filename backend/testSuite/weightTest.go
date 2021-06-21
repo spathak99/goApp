@@ -25,8 +25,8 @@ func WeightTestHelper(query1 string, query2 string) (int, int) {
 	return weight, goalWeight
 }
 
-// TestWeightsUpdate tests if the users weights are updated as intended
-func TestWeightsUpdate(t *testing.T) {
+// WeightUpdateTest tests if the users weights are updated as intended
+func WeightUpdateTest(t *testing.T) {
 	//Test 1
 	mockData1 := []byte(`{
         "username":"testingaccount",
@@ -57,4 +57,6 @@ func TestWeightsUpdate(t *testing.T) {
 	assert.Equal(t, 330, weight2)
 	assert.Equal(t, 220, goalWeight2)
 }
+
+
 

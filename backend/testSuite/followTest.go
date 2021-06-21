@@ -28,8 +28,8 @@ func FollowTestHelper(query1 string, query2 string) ([]string, []string) {
 	return following, followers
 }
 
-// TestFollower tests if the follow and unfollow handlers work as intended
-func TestFollower(t *testing.T) {
+// FollowTest tests if the follow and unfollow handlers work as intended
+func FollowTest(t *testing.T) {
 	//Test 1
 	mockData1 := []byte(`{
 		"follower":"testingaccount",
@@ -72,3 +72,4 @@ func TestFollower(t *testing.T) {
 	assert.NotContains(t, following2, "Bijon")
 	assert.NotContains(t, followers2, "testingaccount")
 }
+

@@ -27,8 +27,8 @@ func FuzzyTestHelper(res string) []string {
 	return usernames
 }
 
-// TestFuzzySearch tests if the program can search for users
-func TestFuzzySearch(t *testing.T) {
+// FuzzySearchTest tests if the program can search for users
+func FuzzySearchTest(t *testing.T) {
 	mockData1 := []byte(`{
 		"username":"testingaccount",
 		"query":"Shard"
