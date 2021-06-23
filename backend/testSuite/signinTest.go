@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var baseURL = "http://localhost:8000"
+
 
 // TestSignin Test if signin works
 func SigninTest(t *testing.T) {
