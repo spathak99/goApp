@@ -19,6 +19,7 @@ func PostTest(t *testing.T) {
 		"likes":[]
 	}`)
 
+	//Test 1
 	resp,_ := TstHelper(mockData1, postHandlers.MakePost, "/make_post")
 	assert.Equal(t, resp, 200)
 
@@ -31,6 +32,7 @@ func PostTest(t *testing.T) {
 		"likes":[]
 	}`)
 
+	//Test 2
 	resp,_ = TstHelper(mockData2, postHandlers.MakePost, "/make_post")
 	assert.Equal(t, resp, 200)
 }

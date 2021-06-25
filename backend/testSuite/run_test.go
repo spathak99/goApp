@@ -8,7 +8,7 @@ import(
 )
 
 //Backend URL
-var baseURL string 
+ var baseURL = "" 
 
 func TestHandlers(t *testing.T){
 

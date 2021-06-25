@@ -45,6 +45,8 @@ func UpdateLiftsTest(t *testing.T) {
 	query := "select * from userlifts where username='testingaccount'"
 	resp,_ := TstHelper(mockData1, liftHandlers.UpdateLifts, "/update_lifts")
 	lifts := LiftTestHelper(query)
+
+	//Test 1
 	assert.Equal(t, 200, resp)
 	assert.Equal(t, "testingaccount", lifts.Username)
 
@@ -59,6 +61,7 @@ func UpdateLiftsTest(t *testing.T) {
 	bMax, _ := strconv.Atoi(fmt.Sprint(liftmap["Bench"].(map[string]interface{})["Current Max"]))
 	bERM, _ := strconv.Atoi(fmt.Sprint(liftmap["Bench"].(map[string]interface{})["Estimated Max"]))
 
+	//Test 2
 	assert.Equal(t, dlMax, 450)
 	assert.Equal(t, dlERM, 475)
 	assert.Equal(t, sqMax, 350)

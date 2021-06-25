@@ -34,6 +34,7 @@ func FuzzySearchTest(t *testing.T) {
 		"query":"Shard"
 	}`)
 
+	//Test 1
 	resp1,res1 := TstHelper(mockData1, fuzzySearch.FuzzySearch, "/search")
 	usernames := FuzzyTestHelper(res1)
 	assert.Equal(t, 200, resp1)
@@ -45,6 +46,7 @@ func FuzzySearchTest(t *testing.T) {
 		"query":"Shardool Pa"
 	}`)
 
+	//Test 2
 	resp2,res2 := TstHelper(mockData2, fuzzySearch.FuzzySearch, "/search")
 	usernames2 := FuzzyTestHelper(res2)
 	assert.Equal(t, 200, resp2)

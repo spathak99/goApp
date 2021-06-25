@@ -12,6 +12,7 @@ func LogTest(t *testing.T) {
 		"username":"testingaccount"
 	}`)
 
+	//Test1
 	statusCode,_ := TstHelper(mockData1, liftHandlers.GetLiftNames, "/get_lifts")
 	assert.Equal(t, statusCode, 200)
 
@@ -26,6 +27,7 @@ func LogTest(t *testing.T) {
 		"pr":true
 	}`)
 
+	//Test 2
 	statusCode,_ = TstHelper(mockData2,liftHandlers.LogExercise, "/logexercise")
 	assert.Equal(t, statusCode, 200)
 }

@@ -37,6 +37,7 @@ func LikesTest(t *testing.T) {
 	assert.Equal(t, 200, resp1)
 	assert.Contains(t, likes, "testingaccount")
 
+	//Test 2
 	resp2,_ := TstHelper(mockData1, likeHandlers.Unlike, "/unlike_post")
 	likes2 := LikesTestHelper(query)
 	assert.Equal(t, 200, resp2)

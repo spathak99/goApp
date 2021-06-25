@@ -24,6 +24,7 @@ import (
 func StartServer() {
 	print("Starting Server")
 
+	//Routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("/signin", signinHandlers.Signin)
 	mux.HandleFunc("/signup", signinHandlers.Signup)

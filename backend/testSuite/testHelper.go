@@ -34,7 +34,8 @@ func TstHelper(data []byte, f http.HandlerFunc, route string) (int,string) {
 	handler.ServeHTTP(w, req)
 	resp := w.Result()
 	fmt.Printf("%s - %d\n",route,resp.StatusCode)
-	//TEST
+	
+	//Request
 	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
 	if err != nil {
 		panic(err)
