@@ -2,7 +2,7 @@ package testSuite
 
 import (
 	"testing"
-	"goApp/backend/calorieHandlers"
+	calorieHandlers "goApp/backend/handlers/calorieHandlers"
 	"github.com/stretchr/testify/assert"
 )
 

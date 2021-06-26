@@ -5,7 +5,7 @@ import (
 	"goApp/backend/types"
 	"testing"
 	"encoding/json"
-	"goApp/backend/fuzzySearch"
+	fuzzySearch"goApp/backend/handlers/fuzzySearch"
 	"github.com/stretchr/testify/assert"
 )
 

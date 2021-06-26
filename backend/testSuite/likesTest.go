@@ -5,7 +5,7 @@ import (
 	"testing"
 	"github.com/lib/pq"
 	"fmt"
-	"goApp/backend/likeHandlers"
+	likeHandlers "goApp/backend/handlers/likeHandlers"
 	"github.com/stretchr/testify/assert"
 )
 

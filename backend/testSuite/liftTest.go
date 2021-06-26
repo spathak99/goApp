@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"encoding/json"
-	"goApp/backend/liftHandlers"
+	liftHandlers "goApp/backend/handlers/liftHandlers"
 	"github.com/stretchr/testify/assert"
 )
 

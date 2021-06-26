@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"fmt"
 	"net/http/httptest"
-	"goApp/backend/signinHandlers"
+	signinHandlers "goApp/backend/handlers/signinHandlers"
 )
 
 

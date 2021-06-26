@@ -3,7 +3,7 @@
 package testSuite
 
 import (
-	"goApp/backend/postHandlers"
+	postHandlers "goApp/backend/handlers/postHandlers"
 	"testing"
 	"github.com/stretchr/testify/assert"
 )

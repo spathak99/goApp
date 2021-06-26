@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 	"goApp/backend/server"
-	"goApp/backend/signinHandlers"
+	signinHandlers "goApp/backend/handlers/signinHandlers"
 	"github.com/stretchr/testify/assert"
 )
 

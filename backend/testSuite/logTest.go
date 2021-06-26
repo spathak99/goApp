@@ -2,7 +2,7 @@ package testSuite
 
 import (
 	"testing"
-	"goApp/backend/liftHandlers"
+	liftHandlers "goApp/backend/handlers/liftHandlers"
 	"github.com/stretchr/testify/assert"
 )
 

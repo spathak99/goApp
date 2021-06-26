@@ -6,7 +6,7 @@ import (
 	"testing"
 	"goApp/backend/types"
 	"goApp/backend/db"
-	"goApp/backend/feedHandlers"
+	feedHandlers "goApp/backend/handlers/feedHandlers"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )

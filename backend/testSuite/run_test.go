@@ -10,6 +10,7 @@ import(
 //Backend URL
  var baseURL = "" 
 
+ //Run Tests
 func TestHandlers(t *testing.T){
 
 	//Load URL
