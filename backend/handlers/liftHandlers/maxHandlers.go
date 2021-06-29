@@ -35,6 +35,7 @@ func GetUserMax(w http.ResponseWriter, r *http.Request) {
 
 //EstimateMax calculates the estimated one rep max
 func EstimateMax(w http.ResponseWriter, r *http.Request) {
+
 	//Authentication
 	helpers.Authenticate(w,r)
 

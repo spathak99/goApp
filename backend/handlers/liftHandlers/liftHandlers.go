@@ -8,11 +8,14 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
+	"goApp/backend/handlers"
 )
 
+//Wrapper
+type extended handlers.HandlerWrapper
 
 // InitializeLifts initializes the first set of lifts entered by the user
-func InitializeLifts(w http.ResponseWriter, r *http.Request) {
+func  InitializeLifts(w http.ResponseWriter, r *http.Request) {
 	//Authentication
 	helpers.Authenticate(w,r)
 

@@ -10,10 +10,14 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
+	"goApp/backend/handlers"
 )
 
+//Wrapper
+type extended handlers.HandlerWrapper
+
 // LikePost adds a username to the list of likes on a given post
-func LikePost(w http.ResponseWriter, r *http.Request) {
+func  LikePost(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
 	helpers.Authenticate(w,r)
@@ -48,7 +52,7 @@ func LikePost(w http.ResponseWriter, r *http.Request) {
 }
 
 // Unlike removes a user from the list of likes on a post
-func Unlike(w http.ResponseWriter, r *http.Request) {
+func  Unlike(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
 	helpers.Authenticate(w,r)

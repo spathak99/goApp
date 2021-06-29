@@ -9,8 +9,11 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
+	"goApp/backend/handlers"
 )
 
+//Wrapper
+type extended handlers.HandlerWrapper
 
 
 //GetUsers gets all users except the current user
@@ -48,7 +51,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 
 // GetUserData grabs profile struct data for the given user
-func GetUserData(w http.ResponseWriter, r *http.Request) {
+func  GetUserData(w http.ResponseWriter, r *http.Request) {
 
 	//Authentication
 	helpers.Authenticate(w,r)

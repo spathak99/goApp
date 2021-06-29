@@ -1,4 +1,4 @@
-package handlers
+package postHandlers
 
 import (
 	"encoding/json"
@@ -10,7 +10,12 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
+	"goApp/backend/handlers"
 )
+
+//Wrapper
+type extended handlers.HandlerWrapper
+
 
 // MakePost creates a post and adds that post to the posts table
 func MakePost(w http.ResponseWriter, r *http.Request) {

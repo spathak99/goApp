@@ -12,6 +12,7 @@ import (
 
 //GetLiftNames gets all the types of lifts that have been logged
 func GetLiftNames(w http.ResponseWriter, r *http.Request){
+
 	//Authentication
 	helpers.Authenticate(w,r)
 

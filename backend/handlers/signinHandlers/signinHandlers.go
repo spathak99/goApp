@@ -9,16 +9,18 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
+	"goApp/backend/handlers"
 	"golang.org/x/crypto/bcrypt"
 )
 
+//Wrapper
+type extended handlers.HandlerWrapper
+ 
 
 // Signin signs in the user and authenticates them
 func Signin(w http.ResponseWriter, r *http.Request) {
 	//Start Session
 	session, _ := helpers.Store.Get(r, helpers.CookieName)
-
-
 
 	//User authentication below
 	creds := &types.Profile{}
@@ -76,7 +78,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 // Signup creates a new entry in the users table in the db
-func  Signup(w http.ResponseWriter, r *http.Request) {
+func Signup(w http.ResponseWriter, r *http.Request) {
 
 	//Decode Creds
 	creds := &types.Profile{}

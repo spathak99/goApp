@@ -8,7 +8,11 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
+	"goApp/backend/handlers"
 )
+
+//Wrapper
+type extended handlers.HandlerWrapper
 
 // UpdateDescription updates the bio of the given user in their db entry
 func UpdateDescription(w http.ResponseWriter, r *http.Request) {

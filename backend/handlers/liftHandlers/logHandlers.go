@@ -58,6 +58,7 @@ func GrabLog(w http.ResponseWriter, r *http.Request) {
 	helpers.Authenticate(w,r)
 
 	//Credentials
+
 	creds := &types.Lift{}
 	body, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(body, &creds)

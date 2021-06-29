@@ -9,7 +9,11 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
+	"goApp/backend/handlers"
 )
+
+//Wrapper
+type extended handlers.HandlerWrapper
 
 // UpdateWeights updates the goal weight and current body weight of the user
 func UpdateWeights(w http.ResponseWriter, r *http.Request) {
