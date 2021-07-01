@@ -19,7 +19,12 @@ type extended handlers.HandlerWrapper
 
 // Signin signs in the user and authenticates them
 func Signin(w http.ResponseWriter, r *http.Request) {
+	
+	//vars := mux.Vars(r)
+
+	
 	//Start Session
+	//print(params.ByName("testFlag"))
 	session, _ := helpers.Store.Get(r, helpers.CookieName)
 
 	//User authentication below

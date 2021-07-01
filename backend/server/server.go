@@ -1,4 +1,3 @@
-
 package server
 
 import (
@@ -26,7 +25,7 @@ func StartServer() {
 
 	//Routes
 	mux := http.NewServeMux()
-	mux.HandleFunc("/signin", signinHandlers.Signin)
+	mux.HandleFunc("/signin/{flag}", signinHandlers.Signin)
 	mux.HandleFunc("/signup", signinHandlers.Signup)
 	mux.HandleFunc("/logout", signinHandlers.Logout)
 	mux.HandleFunc("/get_all_users", userHandlers.GetUsers)
@@ -62,5 +61,3 @@ func StartServer() {
 	handler := cors.Default().Handler(mux)
 	http.ListenAndServe(":8000", handler)
 }
-
-

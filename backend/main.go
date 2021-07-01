@@ -19,6 +19,7 @@ func main() {
 		HttpOnly: false,
 		Secure:   false,
 	}
+	
 	server.StartServer()
 }
 
