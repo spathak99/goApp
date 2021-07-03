@@ -9,12 +9,7 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
-	"goApp/backend/handlers"
 )
-
-//Wrapper
-type extended handlers.HandlerWrapper
-
 
 //GetUsers gets all users except the current user
 func GetUsers(w http.ResponseWriter, r *http.Request) {

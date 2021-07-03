@@ -10,11 +10,7 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
-	"goApp/backend/handlers"
 )
-
-//Wrapper
-type extended handlers.HandlerWrapper
 
 
 // MakePost creates a post and adds that post to the posts table

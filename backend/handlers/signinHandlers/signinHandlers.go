@@ -9,12 +9,9 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
-	"goApp/backend/handlers"
 	"golang.org/x/crypto/bcrypt"
 )
 
-//Wrapper
-type extended handlers.HandlerWrapper
  
 
 // Signin signs in the user and authenticates them

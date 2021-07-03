@@ -9,11 +9,7 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
-	"goApp/backend/handlers"
 )
-
-//Wrapper
-type extended handlers.HandlerWrapper
 
 
 //Follow adds the users from the following/follower list in the respective db entries

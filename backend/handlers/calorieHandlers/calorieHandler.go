@@ -7,12 +7,8 @@ import (
 	_ "github.com/lib/pq"
 	"goApp/backend/db"
 	"goApp/backend/types"
-	"goApp/backend/handlers"
 	"goApp/backend/helpers"
 )
-
-//Wrapper
-type extended handlers.HandlerWrapper
 
 // UpdateCalories updates the calorie goals and calorie counts for the user
 func UpdateCalories(w http.ResponseWriter, r *http.Request) {

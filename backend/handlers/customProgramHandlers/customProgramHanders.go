@@ -8,11 +8,7 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
-	"goApp/backend/handlers"
 )
-
-//Wrapper
-type extended handlers.HandlerWrapper
 
 // InitializeProgram initializes the first custom program
 func InitializeProgram(w http.ResponseWriter, r *http.Request) {

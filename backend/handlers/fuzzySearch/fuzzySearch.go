@@ -7,12 +7,7 @@ import (
 	"goApp/backend/types"
 	"goApp/backend/helpers"
 	"github.com/lib/pq"
-	"goApp/backend/handlers"
 )
-
-//Wrapper
-type extended handlers.HandlerWrapper
-
 
 // FuzzySearch does a fuzzy search of the name of the user
 func FuzzySearch(w http.ResponseWriter, r *http.Request) {

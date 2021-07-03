@@ -10,11 +10,8 @@ import (
 	"strings"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
-	"goApp/backend/handlers"
 )
 
-//Wrapper
-type extended handlers.HandlerWrapper
 
 // GetFeed grabs the news feed for a given user
 func GetFeed(w http.ResponseWriter, r *http.Request) {

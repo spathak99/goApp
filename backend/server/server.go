@@ -22,9 +22,9 @@ import (
 //StartServer begins the server
 func StartServer() {
 	print("Starting Server")
+	mux := http.NewServeMux()
 
 	//Routes
-	mux := http.NewServeMux()
 	mux.HandleFunc("/signin/{flag}", signinHandlers.Signin)
 	mux.HandleFunc("/signup", signinHandlers.Signup)
 	mux.HandleFunc("/logout", signinHandlers.Logout)
