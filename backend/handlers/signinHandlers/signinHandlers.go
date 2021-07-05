@@ -9,19 +9,17 @@ import (
 	"goApp/backend/db"
 	"goApp/backend/types"
 	"goApp/backend/helpers"
+	"goApp/backend/handlers"
 	"golang.org/x/crypto/bcrypt"
 )
 
+ //Wrapper
+type extended handlers.HandlerWrapper
  
-
 // Signin signs in the user and authenticates them
-func Signin(w http.ResponseWriter, r *http.Request) {
-	
-	//vars := mux.Vars(r)
-
+func Signin (w http.ResponseWriter, r *http.Request) {
 	
 	//Start Session
-	//print(params.ByName("testFlag"))
 	session, _ := helpers.Store.Get(r, helpers.CookieName)
 
 	//User authentication below
