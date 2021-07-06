@@ -22,8 +22,19 @@ func TestSignin(t *testing.T){
 		"username":"testingaccount",
 		"password":"password"
 	}`)
-	//Test 1
 
+
+	//Test 2
 	resp,_ = Test_Helper(OKSigninData, signinHandler.Signin, "/signin")
+	assert.Equal(t,200,resp)
+}
+
+
+//TestLogout tests if signin is done properly
+func TestLogout(t *testing.T){
+	Data := []byte(`{}`)
+
+	//Test 1
+	resp,_ := Test_Helper(Data, signinHandler.Logout, "/logout")
 	assert.Equal(t,200,resp)
 }
