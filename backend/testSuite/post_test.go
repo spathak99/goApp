@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//PostTest tests is a post can be made
-func PostTest(t *testing.T) {
+//TestPosts tests is a post can be made
+func TestPosts(t *testing.T) {
 	mockData1 := []byte(`{
 		"id":"none",
 		"username":"testingaccount",
@@ -20,7 +20,7 @@ func PostTest(t *testing.T) {
 	}`)
 
 	//Test 1
-	resp,_ := TstHelper(mockData1, postHandlers.MakePost, "/make_post")
+	resp,_ := Test_Helper(mockData1, postHandlers.MakePost, "/make_post")
 	assert.Equal(t, resp, 200)
 
 	mockData2 := []byte(`{
@@ -33,6 +33,6 @@ func PostTest(t *testing.T) {
 	}`)
 
 	//Test 2
-	resp,_ = TstHelper(mockData2, postHandlers.MakePost, "/make_post")
+	resp,_ = Test_Helper(mockData2, postHandlers.MakePost, "/make_post")
 	assert.Equal(t, resp, 200)
 }

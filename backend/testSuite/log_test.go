@@ -6,14 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//LogTest tests is a post can be made
-func LogTest(t *testing.T) {
+//TestLog tests is a post can be made
+func TestLog(t *testing.T) {
 	mockData1 := []byte(`{
 		"username":"testingaccount"
 	}`)
 
 	//Test1
-	statusCode,_ := TstHelper(mockData1, liftHandlers.GetLiftNames, "/get_lifts")
+	statusCode,_ := Test_Helper(mockData1, liftHandlers.GetLiftNames, "/get_lifts")
 	assert.Equal(t, statusCode, 200)
 
 	mockData2 := []byte(`{
@@ -28,6 +28,6 @@ func LogTest(t *testing.T) {
 	}`)
 
 	//Test 2
-	statusCode,_ = TstHelper(mockData2,liftHandlers.LogExercise, "/logexercise")
+	statusCode,_ = Test_Helper(mockData2,liftHandlers.LogExercise, "/logexercise")
 	assert.Equal(t, statusCode, 200)
 }

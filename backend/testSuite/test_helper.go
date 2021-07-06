@@ -7,11 +7,23 @@ import (
 	"net/http/httptest"
 	"gopkg.in/h2non/gock.v1"
 	"goApp/backend/server"
+	"github.com/joho/godotenv"
+	"os"
+	"log"
 )
 
-
 //Helper for testing
-func TstHelper(data []byte, f http.HandlerFunc, route string) (int,string) {
+func Test_Helper(data []byte, f http.HandlerFunc, route string) (int,string) {
+
+
+	//Load URL
+	err := godotenv.Load()
+	if err != nil {
+	  log.Fatal("Error loading .env file")
+	}
+	baseURL := os.Getenv("BaseURL")
+
+
 	go server.StartServer()
 
 	OKSigninData := []byte(`{

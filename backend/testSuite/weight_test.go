@@ -25,8 +25,8 @@ func WeightTestHelper(query1 string, query2 string) (int, int) {
 	return weight, goalWeight
 }
 
-// WeightUpdateTest tests if the users weights are updated as intended
-func WeightUpdateTest(t *testing.T) {
+// TestWeightUpdate tests if the users weights are updated as intended
+func TestWeightUpdate(t *testing.T) {
 	//Test 1
 	mockData1 := []byte(`{
         "username":"testingaccount",
@@ -44,14 +44,14 @@ func WeightUpdateTest(t *testing.T) {
 	Query1 := "select bodyweight from users where username=$1"
 	Query2 := "select goalweight from users where username=$1"
 	//Test 1
-	resp1,_ := TstHelper(mockData1,weightHandlers.UpdateWeights,"/update_weight")
+	resp1,_ := Test_Helper(mockData1,weightHandlers.UpdateWeights,"/update_weight")
 	weight1, goalWeight1 := WeightTestHelper(Query1, Query2)
 	assert.Equal(t, 200, resp1)
 	assert.Equal(t, 190, weight1)
 	assert.Equal(t, 245, goalWeight1)
 
 	//Test 2
-	resp2,_ := TstHelper(mockData2,weightHandlers.UpdateWeights,"/update_weight")
+	resp2,_ := Test_Helper(mockData2,weightHandlers.UpdateWeights,"/update_weight")
 	weight2, goalWeight2 := WeightTestHelper(Query1, Query2)
 	assert.Equal(t, 200, resp2)
 	assert.Equal(t, 330, weight2)

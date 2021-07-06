@@ -27,15 +27,15 @@ func FuzzyTestHelper(res string) []string {
 	return usernames
 }
 
-// FuzzySearchTest tests if the program can search for users
-func FuzzySearchTest(t *testing.T) {
+// TestFuzzySearch tests if the program can search for users
+func TestFuzzySearch(t *testing.T) {
 	mockData1 := []byte(`{
 		"username":"testingaccount",
 		"query":"Shard"
 	}`)
 
 	//Test 1
-	resp1,res1 := TstHelper(mockData1, fuzzySearch.FuzzySearch, "/search")
+	resp1,res1 := Test_Helper(mockData1, fuzzySearch.FuzzySearch, "/search")
 	usernames := FuzzyTestHelper(res1)
 	assert.Equal(t, 200, resp1)
 	assert.Contains(t, usernames, "Shardool")
@@ -47,7 +47,7 @@ func FuzzySearchTest(t *testing.T) {
 	}`)
 
 	//Test 2
-	resp2,res2 := TstHelper(mockData2, fuzzySearch.FuzzySearch, "/search")
+	resp2,res2 := Test_Helper(mockData2, fuzzySearch.FuzzySearch, "/search")
 	usernames2 := FuzzyTestHelper(res2)
 	assert.Equal(t, 200, resp2)
 	assert.Contains(t, usernames2, "Shardool")

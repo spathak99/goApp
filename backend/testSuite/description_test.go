@@ -19,8 +19,8 @@ func DescTestHelper() string {
 	return desc
 }
 
-//DescTest tests if the user bio update works as intended
-func DescTest(t *testing.T) {
+//TestDescriptionUpdate tests if the user bio update works as intended
+func TestDescriptionUpdate(t *testing.T) {
 	mockData1 := []byte(`{
         "username":"testingaccount",
         "description":"Test Bio 1"
@@ -32,13 +32,13 @@ func DescTest(t *testing.T) {
     }`)
 
 	//Test 1
-	resp1,_ := TstHelper(mockData1,descriptionHandlers.UpdateDescription,"/update_bio")
+	resp1,_ := Test_Helper(mockData1,descriptionHandlers.UpdateDescription,"/update_bio")
 	desc1 := DescTestHelper()
 	assert.Equal(t, 200, resp1)
 	assert.Equal(t, "Test Bio 1", desc1)
 
 	//Test 2
-	resp2,_ := TstHelper(mockData2,descriptionHandlers.UpdateDescription,"/update_bio")
+	resp2,_ := Test_Helper(mockData2,descriptionHandlers.UpdateDescription,"/update_bio")
 	assert.Equal(t, 200, resp2)
 	desc2 := DescTestHelper()
 	assert.Equal(t, "Test Bio 4", desc2)

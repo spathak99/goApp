@@ -22,8 +22,8 @@ func LikesTestHelper(query string) []string {
 	return likes
 }
 
-// LikesTest tests liking and unliking posts
-func LikesTest(t *testing.T) {
+// TestLikes tests liking and unliking posts
+func TestLikes(t *testing.T) {
 	mockData1 := []byte(`{
         "username":"testingaccount",
         "id":"5492C1CA32B7"
@@ -32,13 +32,13 @@ func LikesTest(t *testing.T) {
 	query := fmt.Sprintf("select likes from posts where id='%s'", "5492C1CA32B7")
 
 	//Test 1
-	resp1,_ := TstHelper(mockData1, likeHandlers.LikePost, "/like_post")
+	resp1,_ := Test_Helper(mockData1, likeHandlers.LikePost, "/like_post")
 	likes := LikesTestHelper(query)
 	assert.Equal(t, 200, resp1)
 	assert.Contains(t, likes, "testingaccount")
 
 	//Test 2
-	resp2,_ := TstHelper(mockData1, likeHandlers.Unlike, "/unlike_post")
+	resp2,_ := Test_Helper(mockData1, likeHandlers.Unlike, "/unlike_post")
 	likes2 := LikesTestHelper(query)
 	assert.Equal(t, 200, resp2)
 	assert.NotContains(t, likes2, "testingaccount")

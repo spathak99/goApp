@@ -10,8 +10,8 @@ import (
 
 
 
-//CalculateMaxTest tests if a one rep max estimate is valid
-func CalculateMaxTest(t *testing.T) {
+//TestMaxCalculation tests if a one rep max estimate is valid
+func TestMaxCalculation(t *testing.T) {
 	mockData1 := []byte(`{
 		"weight": 405,
 		"reps": 3,
@@ -19,7 +19,7 @@ func CalculateMaxTest(t *testing.T) {
 	}`)
 
 	//Test 1
-	resp, ret := TstHelper(mockData1, liftHandlers.EstimateMax, "/estimate_max")
+	resp, ret := Test_Helper(mockData1, liftHandlers.EstimateMax, "/estimate_max")
 	ERM, _ := strconv.Atoi(ret)
 	assert.Equal(t, resp, 200)
 	assert.Equal(t, ERM, 462)
@@ -31,7 +31,7 @@ func CalculateMaxTest(t *testing.T) {
 	}`)
 
 	//Test 2
-	resp, ret = TstHelper(mockData2, liftHandlers.EstimateMax, "/estimate_max")
+	resp, ret = Test_Helper(mockData2, liftHandlers.EstimateMax, "/estimate_max")
 	ERM, _ = strconv.Atoi(ret)
 	assert.Equal(t, resp, 200)
 	assert.Equal(t, ERM, 241)
@@ -43,7 +43,7 @@ func CalculateMaxTest(t *testing.T) {
 	}`)
 
 	//Test 3
-	resp, ret = TstHelper(mockData3, liftHandlers.EstimateMax, "/estimate_max")
+	resp, ret = Test_Helper(mockData3, liftHandlers.EstimateMax, "/estimate_max")
 	ERM, _ = strconv.Atoi(ret)
 	assert.Equal(t, resp, 200)
 	assert.Equal(t, ERM, 365)

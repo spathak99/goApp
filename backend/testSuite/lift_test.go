@@ -23,8 +23,8 @@ func LiftTestHelper(query string) (types.UserLifts) {
 	return temp
 }
 
-//UpdateLiftsTest tests if the lift dictionary was properly updated
-func UpdateLiftsTest(t *testing.T) {
+//TestLiftUpdate tests if the lift dictionary was properly updated
+func TestLiftUpdate(t *testing.T) {
 	mockData1 := []byte(`{
 		"username":"testingaccount",
 		"lifts": {
@@ -43,7 +43,7 @@ func UpdateLiftsTest(t *testing.T) {
 		}
 	}`)
 	query := "select * from userlifts where username='testingaccount'"
-	resp,_ := TstHelper(mockData1, liftHandlers.UpdateLifts, "/update_lifts")
+	resp,_ := Test_Helper(mockData1, liftHandlers.UpdateLifts, "/update_lifts")
 	lifts := LiftTestHelper(query)
 
 	//Test 1

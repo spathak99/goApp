@@ -28,8 +28,8 @@ func FeedTestHelper(res string) ([]string) {
 	return usernames
 }
 
-//NewsFeedTest checks if a feed can be grabbed for a user
-func NewsFeedTest(t *testing.T) {
+//TestNewsFeed checks if a feed can be grabbed for a user
+func TestNewsFeed(t *testing.T) {
 	mockData := []byte(`{
 		"username":"testingaccount"
 	}`)
@@ -42,7 +42,7 @@ func NewsFeedTest(t *testing.T) {
 		panic(err)
 	}
 
-	resp,res := TstHelper(mockData,feedHandlers.GetFeed, "/get_feed")
+	resp,res := Test_Helper(mockData,feedHandlers.GetFeed, "/get_feed")
 	usernames := FeedTestHelper(res)
 	assert.Equal(t, resp, 200)
 	for _, username := range usernames {
@@ -51,12 +51,12 @@ func NewsFeedTest(t *testing.T) {
 }
 
 
-//PersonalFeedTest checks if the feed for the user is retrieved
-func PersonalFeedTest(t *testing.T) {
+//TestPersonalFeed checks if the feed for the user is retrieved
+func TestPersonalFeed(t *testing.T) {
 	mockData := []byte(`{
 		"username":"Shardool"
 	}`)
-	resp,_ := TstHelper(mockData, feedHandlers.GetPersonalFeed, "/get_personal_feed")
+	resp,_ := Test_Helper(mockData, feedHandlers.GetPersonalFeed, "/get_personal_feed")
 	assert.Equal(t, resp, 200)
 }
 
