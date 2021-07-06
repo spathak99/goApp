@@ -28,7 +28,7 @@ func DescTest(t *testing.T) {
 
 	mockData2 := []byte(`{
         "username":"testingaccount",
-        "description":"Test Bio 3"
+        "description":"Test Bio 4"
     }`)
 
 	//Test 1
@@ -41,5 +41,5 @@ func DescTest(t *testing.T) {
 	resp2,_ := TstHelper(mockData2,descriptionHandlers.UpdateDescription,"/update_bio")
 	assert.Equal(t, 200, resp2)
 	desc2 := DescTestHelper()
-	assert.Equal(t, "Test Bio 3", desc2)
+	assert.Equal(t, "Test Bio 4", desc2)
 }

@@ -21,8 +21,6 @@ func TestHandlers(t *testing.T){
     
 	baseURL = os.Getenv("BaseURL")
 
-	//Run Tests
-	SigninTest(t)
 	UpdateCalorieTest(t)
 	DescTest(t)
 	NewsFeedTest(t)

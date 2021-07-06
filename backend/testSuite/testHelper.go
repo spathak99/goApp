@@ -1,53 +1,49 @@
 
 package testSuite
 
-import (
+import (	
 	"bytes"
 	"net/http"
-	"fmt"
 	"net/http/httptest"
-	signinHandlers "goApp/backend/handlers/signinHandlers"
+	"gopkg.in/h2non/gock.v1"
+	"goApp/backend/server"
 )
 
 
 //Helper for testing
 func TstHelper(data []byte, f http.HandlerFunc, route string) (int,string) {
-	var baseURL = "http://localhost:8000"
+	go server.StartServer()
 
-	//Signin
-	signinData := []byte(`{
+	OKSigninData := []byte(`{
 		"username":"testingaccount",
-		"password":"password"
+		"password":"password"	
 	}`)
 
+	defer gock.Off()
+	
+	gock.New(baseURL).
+		Post("/signin").
+		Reply(200).
+		JSON(OKSigninData)
+    
+	req, _ := http.Post(baseURL+"/signin", "application/json",bytes.NewBuffer(OKSigninData))
+	print(req.StatusCode)
+
+	
 	//Request
-	req, err := http.NewRequest("POST", baseURL+"/signin", bytes.NewBuffer(signinData))
+	res,err := http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
 	if err != nil {
 		panic(err)
 	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
+	res.Header.Set("X-Custom-Header", "myvalue")
+	res.Header.Set("Content-Type", "application/json")
 
 	//Serve HTTP
 	w := httptest.NewRecorder()
-	handler := http.HandlerFunc(signinHandlers.Signin)
-	handler.ServeHTTP(w, req)
+	handler := http.HandlerFunc(f)
+	handler.ServeHTTP(w, res)
 	resp := w.Result()
-	fmt.Printf("%s - %d\n",route,resp.StatusCode)
-	
-	//Request
-	req, err = http.NewRequest("POST", baseURL+route, bytes.NewBuffer(data))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
+	resBody := w.Body.String()
 
-	//Serve HTTP
-	handler = http.HandlerFunc(f)
-	handler.ServeHTTP(w, req)
-	resp = w.Result()
-	res := w.Body.String()
-
-	return resp.StatusCode,res
+	return resp.StatusCode,resBody
 }
