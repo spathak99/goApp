@@ -25,9 +25,9 @@ func LikesTestHelper(query string) []string {
 // TestLikes tests liking and unliking posts
 func TestLikes(t *testing.T) {
 	mockData1 := []byte(`{
-        "username":"testingaccount",
-        "id":"5492C1CA32B7"
-    }`)
+		"username":"testingaccount",
+		"id":"5492C1CA32B7"
+	}`)
 
 	query := fmt.Sprintf("select likes from posts where id='%s'", "5492C1CA32B7")
 
